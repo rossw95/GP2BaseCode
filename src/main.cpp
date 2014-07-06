@@ -10,7 +10,7 @@
 #include <gl\GLU.h>
 #endif
 
-
+//Function to initialise OpenGL
 void initOpenGL()
 {
     //Smooth shading
