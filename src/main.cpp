@@ -8,6 +8,24 @@ void render()
     glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
     //clear the colour and depth buffer
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+    //Swith to ModelView
+    glMatrixMode( GL_MODELVIEW );
+    //Reset using the Indentity Matrix
+    glLoadIdentity( );
+    //Do translation, push the next bit of drawing 'back' 6 units
+    //on z-zaxis
+    //Everyting after this will be drawn at -6.0f on z-axis
+    //until reset by glLoadIdentity!
+    glTranslatef( 0.0f, 0.0f, -6.0f );
+
+    //Begin drawing triangles
+    glBegin( GL_TRIANGLES );
+      glVertex3f(  0.0f,  1.0f, 0.0f ); // Top
+      glVertex3f( -1.0f, -1.0f, 0.0f ); // Bottom Left
+      glVertex3f(  1.0f, -1.0f, 0.0f ); // Bottom Right
+    glEnd( );
+
 }
 
 int main(int argc, char * arg[])
@@ -70,7 +88,7 @@ int main(int argc, char * arg[])
 
         //Then Draw
         render();
-        
+
         //Call swap so that our GL back buffer is displayed
         SDL_GL_SwapWindow(window);
 
