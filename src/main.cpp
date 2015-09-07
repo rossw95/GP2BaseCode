@@ -1,6 +1,15 @@
 #include "Common.h"
 #include "Graphics.h"
 
+//We could just use 6 floats instead of this structure
+//equally as valid but this is cleaner
+struct Position{
+  float x,y,z;
+};
+
+Position trianglePos={-1.5f,0.0,-6.0f};
+Position squarePos={1.5f,0.0f,-6.0f};
+
 void render()
 {
     //old imediate mode!
@@ -14,7 +23,7 @@ void render()
     //Reset using the Indentity Matrix
     glLoadIdentity( );
     //translate
-    glTranslatef( -1.5f, 0.0f, -6.0f );
+    glTranslatef( trianglePos.x, trianglePos.y,trianglePos.z );
 
     //Begin drawing triangles
     glBegin( GL_TRIANGLES );
@@ -23,8 +32,12 @@ void render()
         glVertex3f(  1.0f, -1.0f, 0.0f ); // Bottom Right
     glEnd( );
 
+    //Reset using the Indentity Matrix, had to add this to Reset the
+    //position of the ModelView matrix
+    glLoadIdentity( );
+
     //Translate model view 3 units from previos position
-    glTranslatef( 3.0f, 0.0f, 0.0f );
+    glTranslatef( squarePos.x, squarePos.y, squarePos.z );
 
     //Begin Drawing Quads
     glBegin( GL_QUADS );
@@ -86,7 +99,27 @@ int main(int argc, char * arg[])
                     default:
                         break;
                 }
-
+            }
+            //Check for key down event
+            if (event.type==SDL_KEYDOWN)
+            {
+              //and then check the actual key press
+              if (event.key.keysym.sym==SDLK_LEFT)
+              {
+                squarePos.x-=0.1f;
+              }
+              else if (event.key.keysym.sym==SDLK_RIGHT)
+              {
+                squarePos.x+=0.1f;
+              }
+              if (event.key.keysym.sym==SDLK_a)
+              {
+                trianglePos.x-=0.1f;
+              }
+              else if (event.key.keysym.sym==SDLK_d)
+              {
+                trianglePos.x+=0.1f;
+              }
             }
         }
 
