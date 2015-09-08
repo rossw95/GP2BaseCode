@@ -7,7 +7,7 @@
 
 #ifdef __APPLE__
 #include <OpenGL/glu.h>
-#elif WIN32
+#elif  (_WIN64 || _WIN32)
 #include <gl\GLU.h>
 #endif
 
