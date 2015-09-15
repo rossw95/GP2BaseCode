@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <SDL.h>
+#include <SDL_opengl.h>
 
 #ifdef __APPLE__
 #include <OpenGL/glu.h>
