@@ -13,3 +13,9 @@ add_executable(GP2BaseCode src/main.cpp src/Graphics.cpp include/Common.h includ
 include_directories(GP2BaseCode include/ ${OPENGL_INCLUDE_DIRS} ${SDL2_INCLUDE_DIR} ${GLM_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS})
 # create the program
 target_link_libraries(GP2BaseCode ${SDL2_LIBRARY} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} )
+
+if (MSVC)
+add_custom_command(TARGET GP2-Labs POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory
+                       ${CMAKE_SOURCE_DIR}/dlls $<TARGET_FILE_DIR:GP2-Labs>)
+endif (MSVC)
