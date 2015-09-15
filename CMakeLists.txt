@@ -15,7 +15,7 @@ include_directories(GP2BaseCode include/ ${OPENGL_INCLUDE_DIRS} ${SDL2_INCLUDE_D
 target_link_libraries(GP2BaseCode ${SDL2_LIBRARY} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} )
 
 if (MSVC)
-add_custom_command(TARGET GP2-Labs POST_BUILD
+add_custom_command(TARGET GP2BaseCode  POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
-                       ${CMAKE_SOURCE_DIR}/dlls $<TARGET_FILE_DIR:GP2-Labs>)
+                       ${CMAKE_SOURCE_DIR}/dlls $<TARGET_FILE_DIR:GP2BaseCode>)
 endif (MSVC)
