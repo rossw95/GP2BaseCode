@@ -13,26 +13,6 @@ void render()
     glMatrixMode( GL_MODELVIEW );
     //Reset using the Indentity Matrix
     glLoadIdentity( );
-    //translate
-    glTranslatef( -1.5f, 0.0f, -6.0f );
-
-    //Begin drawing triangles
-    glBegin( GL_TRIANGLES );
-        glVertex3f(  0.0f,  1.0f, 0.0f ); // Top
-        glVertex3f( -1.0f, -1.0f, 0.0f ); // Bottom Left
-        glVertex3f(  1.0f, -1.0f, 0.0f ); // Bottom Right
-    glEnd( );
-
-    //Translate model view 3 units from previos position
-    glTranslatef( 3.0f, 0.0f, 0.0f );
-
-    //Begin Drawing Quads
-    glBegin( GL_QUADS );
-        glVertex3f( -1.0f,  1.0f, 0.0f ); // Top Left
-        glVertex3f(  1.0f,  1.0f, 0.0f ); // Top Right
-        glVertex3f(  1.0f, -1.0f, 0.0f ); // Bottom Right
-        glVertex3f( -1.0f, -1.0f, 0.0f ); // Bottom Left
-    glEnd( );
 }
 
 int main(int argc, char * arg[])
@@ -57,6 +37,12 @@ int main(int argc, char * arg[])
                                            480,                        // height, in pixels
                                            SDL_WINDOW_OPENGL           // flags
                                            );
+
+	//Request opengl 3.2 context, compatibility Context
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+
     // Create an OpenGL context associated with the window.
     SDL_GLContext glcontext = SDL_GL_CreateContext(window);
 
