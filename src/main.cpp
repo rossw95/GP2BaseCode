@@ -8,19 +8,16 @@ Vertex verts[]={
      {0.0f,  0.5f, 0.0f}
    };
 
-GLuint VBO;
+GLuint vertexBuffer;
 
-
-void createAndFillBuffer(Vertex *pVerts, int count)
+void initScene()
 {
-  glGenBuffers(1, &VBO);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, count * sizeof(Vertex), pVerts, GL_STATIC_DRAW);
+  vertexBuffer=createAndFillBuffer(verts,3);
 }
 
 void cleanUp()
 {
-  glDeleteBuffers(1,&VBO);
+  glDeleteBuffers(1,&vertexBuffer);
 }
 
 void render()
@@ -98,7 +95,7 @@ int main(int argc, char * arg[])
 
             }
         }
-
+        //init Scene
         //render
         render();
         //Call swap so that our GL back buffer is displayed

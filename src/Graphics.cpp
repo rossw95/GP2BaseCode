@@ -1,5 +1,5 @@
 #include "Graphics.h"
-#include "Common.h"
+#include "Vertices.h"
 
 //Function to initialise OpenGL
 void initOpenGL()
@@ -52,4 +52,14 @@ void setViewport( int width, int height )
 
     //Reset using the Indentity Matrix
     glLoadIdentity( );
+}
+
+GLuint createAndFillBuffer(Vertex *pVerts, int count)
+{
+  GLuint VBO;
+  glGenBuffers(1, &VBO);
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBufferData(GL_ARRAY_BUFFER, count * sizeof(Vertex), pVerts, GL_STATIC_DRAW);
+
+  return VBO;
 }
