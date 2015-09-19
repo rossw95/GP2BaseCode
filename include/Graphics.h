@@ -11,4 +11,8 @@ void setViewport( int width, int height );
 
 GLuint createAndFillBuffer(Vertex *pVerts, int count);
 
+string getRendererCapsAsString();
+
+
+
 #endif

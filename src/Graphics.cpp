@@ -1,9 +1,41 @@
 #include "Graphics.h"
 #include "Vertices.h"
+#include "Common.h"
+
+string getRendererCapsAsString()
+{
+	stringstream stringStream;
+
+	stringStream << "OpenGl Version: " << glGetString(GL_VERSION)<<"\n";
+	stringStream << "Vendor: " << glGetString(GL_VENDOR) << "\n";
+	stringStream << "Renderer: " << glGetString(GL_RENDERER) << "\n";
+	stringStream << "Shading: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << "\n";
+	stringStream << "Extensions Supported\n";
+	GLint n = 0;
+	glGetIntegerv(GL_NUM_EXTENSIONS, &n);
+	for(GLint i = 0; i<n; i++)
+	{
+		const char* extension =
+			(const char*)glGetStringi(GL_EXTENSIONS, i);
+		stringStream << extension << ", ";
+	}
+
+	return stringStream.str();
+}
 
 //Function to initialise OpenGL
 void initOpenGL()
 {
+	glewExperimental = GL_TRUE;
+	GLenum err = glewInit();
+	if (GLEW_OK != err)
+	{
+		//Problem: glewInit failed, something is seriously wrong.
+		std::cout << "Error: " << glewGetErrorString(err) << std::endl;
+	}
+
+	std::cout << getRendererCapsAsString() << endl;
+
     //Smooth shading
     glShadeModel( GL_SMOOTH );
 
@@ -60,6 +92,5 @@ GLuint createAndFillBuffer(Vertex *pVerts, int count)
   glGenBuffers(1, &VBO);
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   glBufferData(GL_ARRAY_BUFFER, count * sizeof(Vertex), pVerts, GL_STATIC_DRAW);
-
   return VBO;
 }

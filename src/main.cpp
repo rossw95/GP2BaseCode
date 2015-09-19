@@ -57,10 +57,10 @@ int main(int argc, char * arg[])
                                            SDL_WINDOW_OPENGL           // flags
                                            );
 
-	//Request opengl 3.2 context, compatibility Context
+	//Request opengl 4.1 context, compatibility Context
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 
     // Create an OpenGL context associated with the window.
     SDL_GLContext glcontext = SDL_GL_CreateContext(window);
