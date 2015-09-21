@@ -4,7 +4,9 @@ project (GP2BaseCode)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 list( APPEND CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS} -ftest-coverage -fprofile-arcs")
 
+
 add_executable(GP2BaseCode src/main.cpp include/Common.h)
+include_directories(GP2BaseCode include/ )
 
 if (MSVC)
 add_custom_command(TARGET GP2-Labs POST_BUILD
