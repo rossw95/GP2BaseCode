@@ -1,6 +1,10 @@
 #include "Common.h"
 #include "Graphics.h"
 
+void update()
+{
+}
+
 void render()
 {
     //old imediate mode!
@@ -13,14 +17,15 @@ void render()
     glMatrixMode( GL_MODELVIEW );
     //Reset using the Indentity Matrix
     glLoadIdentity( );
-    //Do translation, push the next bit of drawing 'back' 6 units
+    //Do translation, push the next bit of drawing 'back' 5 units
     //on z-zaxis
-    //Everyting after this will be drawn at -6.0f on z-axis
+    //Everyting after this will be drawn at -5.0f on z-axis
     //until reset by glLoadIdentity!
-    glTranslatef( 0.0f, 0.0f, -6.0f );
+    glTranslatef( 0.0f, 0.0f, -5.0f );
 
     //Begin drawing triangles
     glBegin( GL_TRIANGLES );
+      glColor3f(1.0f, 0.0f, 0.0f); //Colour of the vertices
       glVertex3f(  0.0f,  1.0f, 0.0f ); // Top
       glVertex3f( -1.0f, -1.0f, 0.0f ); // Bottom Left
       glVertex3f(  1.0f, -1.0f, 0.0f ); // Bottom Right
@@ -85,7 +90,7 @@ int main(int argc, char * arg[])
         }
 
         //update
-
+        update();
         //Then Draw
         render();
 
