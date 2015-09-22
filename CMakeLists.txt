@@ -9,7 +9,7 @@ add_executable(GP2BaseCode src/main.cpp include/Common.h)
 include_directories(GP2BaseCode include/ )
 
 if (MSVC)
-add_custom_command(TARGET GP2-Labs POST_BUILD
+add_custom_command(TARGET GP2BaseCode POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
-                       ${CMAKE_SOURCE_DIR}/dlls $<TARGET_FILE_DIR:GP2-Labs>)
+                       ${CMAKE_SOURCE_DIR}/dlls $<TARGET_FILE_DIR:GP2BaseCode>)
 endif (MSVC)
