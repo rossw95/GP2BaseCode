@@ -10,6 +10,11 @@ void render()
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 }
 
+void update()
+{
+
+}
+
 int main(int argc, char * arg[])
 {
     //Controls the game loop
@@ -49,28 +54,18 @@ int main(int argc, char * arg[])
         //While we still have events in the queue
         while (SDL_PollEvent(&event)) {
             //Get event type
-            if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
+            if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE)
+            {
                 //set our boolean which controls the loop to false
                 run = false;
-            }
-            if (event.type==SDL_WINDOWEVENT)
-            {
-                switch (event.window.event) {
-                    case SDL_WINDOWEVENT_MINIMIZED:
-                            pause=true;
-                        break;
-                    default:
-                        break;
-                }
-
             }
         }
 
         //update
-
+        update();
         //Then Draw
         render();
-        
+
         //Call swap so that our GL back buffer is displayed
         SDL_GL_SwapWindow(window);
 
