@@ -4,8 +4,11 @@
 
 Vertex verts[]={
     {-0.5f, -0.5f, 0.0f},
+    {1.0f,0.0f,0.0f,1.0f},
      {0.5f, -0.5f, 0.0f},
-     {0.0f,  0.5f, 0.0f}
+     {0.0f,1.0f,0.0f,1.0f},
+     {0.0f,  0.5f, 0.0f},
+     {0.0f,0.0f,1.0f,1.0f}
    };
 
 GLuint vertexBuffer;
@@ -43,6 +46,9 @@ void render()
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glVertexPointer(3, GL_FLOAT, 0, 0);
+
+    glEnableClientState(GL_COLOUR_ARRAY);
+    glVertexPointer(4, GL_FLOAT, 3*sizeof(float), 0);
 
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
