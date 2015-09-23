@@ -3,12 +3,12 @@
 #include "Vertices.h"
 
 Vertex verts[]={
-    {-0.5f, -0.5f, 0.0f},
-    {1.0f,0.0f,0.0f,1.0f},
-     {0.5f, -0.5f, 0.0f},
-     {0.0f,1.0f,0.0f,1.0f},
-     {0.0f,  0.5f, 0.0f},
-     {0.0f,0.0f,1.0f,1.0f}
+    {-0.5f, -0.5f, 0.0f,
+      1.0f,0.0f,0.0f,1.0f},
+     {0.5f, -0.5f, 0.0f,
+     0.0f,1.0f,0.0f,1.0f},
+     {0.0f,  0.5f, 0.0f,
+     0.0f,0.0f,1.0f,1.0f}
    };
 
 GLuint vertexBuffer;
@@ -45,14 +45,15 @@ void render()
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 
     glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 0, 0);
+    glVertexPointer(3, GL_FLOAT, sizeof(Vertex), 0);
 
-    glEnableClientState(GL_COLOUR_ARRAY);
-    glVertexPointer(4, GL_FLOAT, 3*sizeof(float), 0);
+    glEnableClientState(GL_COLOR_ARRAY);
+    glColorPointer(4, GL_FLOAT, sizeof(Vertex), (void**)(3 * sizeof(float)));
 
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawArrays(GL_TRIANGLES, 0, sizeof(verts) / sizeof(Vertex));
 
     glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 }
