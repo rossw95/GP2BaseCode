@@ -101,3 +101,11 @@ GLuint createAndFillBuffer(Vertex *pVerts, int count)
   glBufferData(GL_ARRAY_BUFFER, count * sizeof(Vertex), pVerts, GL_STATIC_DRAW);
   return VBO;
 }
+
+GLuint createAndFillBuffer(short *pIndices,int count)
+{
+	GLuint EBO;
+	glGenBuffers(1,&EBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(short), pIndices, GL_STATIC_DRAW);
+}
