@@ -85,9 +85,3 @@ void setViewport( int width, int height )
     //Reset using the Indentity Matrix
     glLoadIdentity( );
 }
-
-void setCameraProperties(float xPos, float yPos, float zPos, float xLook, float yLook, float zLook, float xUp, float yUp, float zUp)
-{
-	glMatrixMode(GL_MODELVIEW);
-	gluLookAt(xPos, yPos, zPos, xLook, yLook, zLook, xUp, yUp, zUp);
-}
