@@ -91,21 +91,3 @@ void setCameraProperties(float xPos, float yPos, float zPos, float xLook, float 
 	glMatrixMode(GL_MODELVIEW);
 	gluLookAt(xPos, yPos, zPos, xLook, yLook, zLook, xUp, yUp, zUp);
 }
-
-
-GLuint createAndFillBuffer(Vertex *pVerts, int count)
-{
-  GLuint VBO;
-  glGenBuffers(1, &VBO);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, count * sizeof(Vertex), pVerts, GL_STATIC_DRAW);
-  return VBO;
-}
-
-GLuint createAndFillBuffer(short *pIndices,int count)
-{
-	GLuint EBO;
-	glGenBuffers(1,&EBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(short), pIndices, GL_STATIC_DRAW);
-}

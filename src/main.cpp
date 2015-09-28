@@ -62,17 +62,18 @@ float xRotation=0.0f;
 float yRotation=0.0f;
 float zRotation=0.0f;
 
-GLuint vertexBuffer;
+GLuint VBO;
 
 void initScene()
 {
-  vertexBuffer=createAndFillBuffer(verts,30);
-  //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  glGenBuffers(1, &VBO);
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
 }
 
 void cleanUp()
 {
-  glDeleteBuffers(1,&vertexBuffer);
+  glDeleteBuffers(1,&VBO);
 }
 
 void render()
@@ -87,21 +88,20 @@ void render()
     glMatrixMode( GL_MODELVIEW );
     //Reset using the Indentity Matrix
     glLoadIdentity( );
-	  setCameraProperties(0.0f, 0.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+    gluLookAt(0.0, 0.0, 6.0, 0.0, 0.0, -1.0f, 0.0, 1.0, 0.0);
     glRotatef(xRotation,1.0f,0.0f,0.0f);
     glRotatef(yRotation,0.0f,1.0f,0.0f);
     glRotatef(zRotation,0.0f,0.0f,1.0f);
 
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, 0);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, sizeof(Vertex), 0);
 
-	glDrawArrays(GL_TRIANGLES, 0, 30);
+    glDrawArrays(GL_TRIANGLES, 0, sizeof(verts) / sizeof(Vertex)) ;
 
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 int main(int argc, char * arg[])
