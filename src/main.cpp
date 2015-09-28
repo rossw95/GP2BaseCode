@@ -11,16 +11,23 @@ Vertex verts[]={
      0.0f,0.0f,1.0f,1.0f}
    };
 
-GLuint vertexBuffer;
+GLuint VBO;
 
 void initScene()
 {
-  vertexBuffer=createAndFillBuffer(verts,3);
+  //Create buffer
+  glGenBuffers(1, &VBO);
+  // Make the new VBO active
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  //Copy Vertex Data to VBO
+  glBufferData(GL_ARRAY_BUFFER, sizeof(verts),
+  verts, GL_STATIC_DRAW);
+
 }
 
 void cleanUp()
 {
-  glDeleteBuffers(1,&vertexBuffer);
+  glDeleteBuffers(1,&VBO);
 }
 
 void update()
@@ -42,7 +49,7 @@ void render()
     glLoadIdentity( );
     glTranslatef(0.0f, 0.0f, -5.0f);
 
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glVertexPointer(3, GL_FLOAT, sizeof(Vertex), 0);
