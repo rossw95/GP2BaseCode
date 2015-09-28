@@ -2,22 +2,24 @@
 #include "Graphics.h"
 #include "Vertices.h"
 
-Vertex verts[]={
-    {-0.5f, -0.5f, 0.0f},
-     {0.5f, -0.5f, 0.0f},
-     {0.0f,  0.5f, 0.0f}
+float verts[]={
+    -0.5f, -0.5f, 0.0f,
+     0.5f, -0.5f, 0.0f,
+     0.0f,  0.5f, 0.0f
    };
 
-GLuint vertexBuffer;
+GLuint VBO;
 
 void initScene()
 {
-  vertexBuffer=createAndFillBuffer(verts,3);
+  glGenBuffers(1, &VBO);
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(verts) , verts, GL_STATIC_DRAW);
 }
 
 void cleanUp()
 {
-  glDeleteBuffers(1,&vertexBuffer);
+  glDeleteBuffers(1,&VBO);
 }
 
 void update()
@@ -39,7 +41,7 @@ void render()
     glLoadIdentity( );
     glTranslatef(0.0f, 0.0f, -5.0f);
 
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glVertexPointer(3, GL_FLOAT, 0, 0);
