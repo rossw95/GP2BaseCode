@@ -71,17 +71,4 @@ void setViewport( int width, int height )
 
     //Setup viewport
     glViewport( 0, 0, ( GLsizei )width, ( GLsizei )height );
-
-    //Change to poject matrix mode
-    glMatrixMode( GL_PROJECTION );
-    glLoadIdentity( );
-
-    //Calculate perspective matrix, using glu library functions
-    gluPerspective( 45.0f, ratio, 0.1f, 100.0f );
-
-    //Swith to ModelView
-    glMatrixMode( GL_MODELVIEW );
-
-    //Reset using the Indentity Matrix
-    glLoadIdentity( );
 }
