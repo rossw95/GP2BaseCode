@@ -3,76 +3,86 @@
 #include "Vertices.h"
 
 Vertex verts[]={
-	//Front Face
-    {-0.5f, -0.5f, 0.5f},
-     {0.5f, -0.5f, 0.5f},
-     {0.5f,  0.5f, 0.5f},
+//Front
+{ -0.5f, 0.5f, 0.5f,
+    1.0f, 0.0f, 1.0f, 1.0f },// Top Left
 
-	 { -0.5f, -0.5f, 0.5f },
-	 {-0.5f, 0.5f, 0.5f},
-	 { 0.5f, 0.5f, 0.5f },
+{ -0.5f, -0.5f, 0.5f,
+    1.0f, 1.0f, 0.0f, 1.0f },// Bottom Left
 
-	 //Back Face
-	 { -0.5f, -0.5f, -0.5f },
-	 { 0.5f, -0.5f, -0.5f },
-	 { 0.5f, 0.5f, -0.5f },
+{ 0.5f, -0.5f, 0.5f,
+    0.0f, 1.0f, 1.0f, 1.0f }, //Bottom Right
 
-	 { -0.5f, -0.5f, -0.5f },
-	 { -0.5f, 0.5f, -0.5f },
-	 { 0.5f, 0.5f, -0.5f },
+{ 0.5f, 0.5f, 0.5f,
+    1.0f, 0.0f, 1.0f, 1.0f },// Top Right
 
-	 //Left Face
-   { -0.5f, -0.5f, -0.5f },
-    { -0.5f, 0.5f, -0.5f },
-    {-0.5f, -0.5f,  0.5f },
 
-    { -0.5f, 0.5f, -0.5f },
-    { -0.5f, 0.5f, 0.5f },
-    { -0.5f, -0.5f, 0.5f },
+//back
+{ -0.5f, 0.5f, -0.5f,
+    1.0f, 0.0f, 1.0f, 1.0f },// Top Left
 
-	 //Right Face
-   { 0.5f, -0.5f, -0.5f },
-    { 0.5f, 0.5f, -0.5f },
-    {0.5f, -0.5f,  0.5f },
+{ -0.5f, -0.5f, -0.5f,
+    1.0f, 1.0f, 0.0f, 1.0f },// Bottom Left
 
-    { 0.5f, 0.5f, -0.5f },
-    { 0.5f, 0.5f, 0.5f },
-    { 0.5f, -0.5f, 0.5f },
+{ 0.5f, -0.5f, -0.5f,
+    0.0f, 1.0f, 1.0f, 1.0f }, //Bottom Right
 
-   //top Face
-   {0.5f,  0.5f, 0.5f},
-   {0.5f,  0.5f, -0.5f},
-   {-0.5f,  0.5f, -0.5f},
+{ 0.5f, 0.5f, -0.5f,
+    1.0f, 0.0f, 1.0f, 1.0f },// Top Right
 
-   {-0.5f,  0.5f, -0.5f},
-   {0.5f,  0.5f, 0.5f},
-   {-0.5f,  0.5f, 0.5f},
+};
 
-	 //bottom Face
-   {0.5f,  -0.5f, 0.5f},
-   {0.5f,  -0.5f, -0.5f},
-   {-0.5f,  -0.5f, -0.5f},
+GLuint indices[]={
+    //front
+    0,1,2,
+    0,3,2,
 
-   {-0.5f,  -0.5f, -0.5f},
-   {0.5f,  -0.5f, 0.5f},
-   {-0.5f,  -0.5f, 0.5f},
-   };
+    //left
+    4,5,1,
+    4,1,0,
+
+    //right
+    3,7,2,
+    7,6,2,
+
+    //bottom
+    1,5,2,
+    6,2,5,
+
+    //top
+    4,0,7,
+    0,7,3,
+
+    //back
+    4,5,6,
+    4,7,6
+};
 
 float xRotation=0.0f;
 float yRotation=0.0f;
 float zRotation=0.0f;
 
-GLuint vertexBuffer;
+GLuint VBO;
+GLuint EBO;
 
 void initScene()
 {
-  vertexBuffer=createAndFillBuffer(verts,30);
-  //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  glGenBuffers(1, &VBO);
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
+
+  //create buffer
+  glGenBuffers(1, &EBO);
+  //Make the EBO active
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  //Copy Index data to the EBO
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 }
 
 void cleanUp()
 {
-  glDeleteBuffers(1,&vertexBuffer);
+  glDeleteBuffers(1, &EBO);
+  glDeleteBuffers(1, &VBO);
 }
 
 void render()
@@ -87,21 +97,26 @@ void render()
     glMatrixMode( GL_MODELVIEW );
     //Reset using the Indentity Matrix
     glLoadIdentity( );
-	  setCameraProperties(0.0f, 0.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+    gluLookAt(0.0, 0.0, 6.0, 0.0, 0.0, -1.0f, 0.0, 1.0, 0.0);
     glRotatef(xRotation,1.0f,0.0f,0.0f);
     glRotatef(yRotation,0.0f,1.0f,0.0f);
     glRotatef(zRotation,0.0f,0.0f,1.0f);
 
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, 0);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, sizeof(Vertex), 0);
 
-	glDrawArrays(GL_TRIANGLES, 0, 30);
+    glEnableClientState(GL_COLOR_ARRAY);
+    glColorPointer(4, GL_FLOAT, sizeof(Vertex), (void**)(3*sizeof(float)));
 
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(GLuint),
+    GL_UNSIGNED_INT,0);
 
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 int main(int argc, char * arg[])
