@@ -88,6 +88,8 @@ void initScene()
   //Tell the shader that 0 is the position element
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), NULL);
+  
+
   glEnableVertexAttribArray(1);
   glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void**)(3 * sizeof(float)));
 
@@ -104,6 +106,11 @@ void initScene()
   shaderProgram = glCreateProgram();
   glAttachShader(shaderProgram, vertexShaderProgram);
   glAttachShader(shaderProgram, fragmentShaderProgram);
+
+  //Link attributes
+  glBindAttribLocation(shaderProgram, 0, "vertexPosition");
+  glBindAttribLocation(shaderProgram, 1, "vertexColour");
+
   glLinkProgram(shaderProgram);
   checkForLinkErrors(shaderProgram);
   //now we can delete the VS & FS Programs
@@ -126,6 +133,7 @@ void update()
   viewMatrix = glm::lookAt(vec3(0.0f, 0.0f, 10.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
 
   worldMatrix= glm::translate(mat4(1.0f), vec3(0.0f,0.0f,0.0f));
+
 }
 
 void render()
@@ -161,9 +169,9 @@ int main(int argc, char * arg[])
 	}
 
 	//Request opengl 4.1 context, Core Context
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,SDL_GL_CONTEXT_PROFILE_CORE);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 
     //Create a window
     SDL_Window * window = SDL_CreateWindow(
