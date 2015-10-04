@@ -17,6 +17,7 @@ GLuint loadShaderFromFile(const std::string& filename, SHADER_TYPE shaderType)
   file.open(filename.c_str(), std::ios::in);
   if (!file)
   {
+	  cout << "File could not be loaded" << endl;
     return 0;
   }
 

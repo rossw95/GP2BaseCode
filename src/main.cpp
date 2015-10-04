@@ -74,10 +74,6 @@ void initScene()
   //Generate Vertex Array
   glGenVertexArrays(1,&VAO);
   glBindVertexArray( VAO );
-  //Tell the shader that 0 is the position element
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), NULL);
-
   glGenBuffers(1, &VBO);
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
@@ -89,8 +85,14 @@ void initScene()
   //Copy Index data to the EBO
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
+  //Tell the shader that 0 is the position element
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), NULL);
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void**)(3 * sizeof(float)));
+
   GLuint vertexShaderProgram=0;
-  string vsPath = ASSET_PATH + SHADER_PATH+"/simpleVS.glsl";
+  string vsPath = ASSET_PATH + SHADER_PATH + "/simpleVS.glsl";
   vertexShaderProgram = loadShaderFromFile(vsPath, VERTEX_SHADER);
   checkForCompilerErrors(vertexShaderProgram);
 
@@ -107,7 +109,6 @@ void initScene()
   //now we can delete the VS & FS Programs
   glDeleteShader(vertexShaderProgram);
   glDeleteShader(fragmentShaderProgram);
-  cout<<"VAO "<<VAO<<endl;
 }
 
 void cleanUp()
@@ -142,12 +143,12 @@ void render()
 
     glBindVertexArray( VAO );
 
-    glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(GLuint),
-    GL_UNSIGNED_INT,0);
+    glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(GLuint),GL_UNSIGNED_INT,0);
 }
 
 int main(int argc, char * arg[])
 {
+	
     //Controls the game loop
     bool run=true;
     bool pause=false;
