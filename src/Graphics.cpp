@@ -58,17 +58,6 @@ void initOpenGL()
 //Function to set/reset viewport
 void setViewport( int width, int height )
 {
-    //screen ration
-    GLfloat ratio;
-
-    //make sure height is always above 1
-    if ( height == 0 ) {
-        height = 1;
-    }
-
-    //calculate screen ration
-    ratio = ( GLfloat )width / ( GLfloat )height;
-
     //Setup viewport
     glViewport( 0, 0, ( GLsizei )width, ( GLsizei )height );
 }
