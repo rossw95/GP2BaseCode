@@ -88,7 +88,7 @@ void initScene()
   //Tell the shader that 0 is the position element
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), NULL);
-  
+
 
   glEnableVertexAttribArray(1);
   glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void**)(3 * sizeof(float)));
@@ -145,6 +145,7 @@ void render()
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     glUseProgram(shaderProgram);
+    
     GLint MVPLocation = glGetUniformLocation(shaderProgram, "MVP");
     mat4 MVP = projMatrix*viewMatrix*worldMatrix;
     glUniformMatrix4fv(MVPLocation, 1, GL_FALSE, glm::value_ptr(MVP));
@@ -156,10 +157,10 @@ void render()
 
 int main(int argc, char * arg[])
 {
-	
+
     //Controls the game loop
     bool run=true;
-    bool pause=false;
+
     // init everyting - SDL, if it is nonzero we have a problem
     if(SDL_Init(SDL_INIT_EVERYTHING) != 0)
     {
@@ -203,14 +204,6 @@ int main(int argc, char * arg[])
             if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
                 //set our boolean which controls the loop to false
                 run = false;
-            }
-            if (event.type==SDL_WINDOWEVENT)
-            {
-                switch (event.window.event) {
-                    case SDL_WINDOWEVENT_MINIMIZED:
-                            pause=true;
-                        break;
-                }
             }
             if (event.type==SDL_KEYDOWN){
                   switch( event.key.keysym.sym )
