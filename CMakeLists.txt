@@ -20,6 +20,6 @@ add_custom_command(TARGET GP2BaseCode  POST_BUILD
                        ${CMAKE_SOURCE_DIR}/dlls $<TARGET_FILE_DIR:GP2BaseCode>)
 endif (MSVC)
 
-add_custom_command(TARGET GP2BaseCode  PRE_BUILD
+add_custom_command(TARGET GP2BaseCode  POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
                  ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:GP2BaseCode>/assets)

@@ -14,8 +14,7 @@ using namespace std;
 
 //maths headers
 #include <glm/glm.hpp>
-using glm::mat4;
-using glm::vec3;
+using namespace glm;
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
