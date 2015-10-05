@@ -5,31 +5,31 @@
 
 Vertex verts[]={
 //Front
-{ -0.5f, 0.5f, 0.5f,
-    1.0f, 0.0f, 1.0f, 1.0f },// Top Left
+{ vec3(-0.5f, 0.5f, 0.5f),
+    vec4(1.0f, 0.0f, 1.0f, 1.0f) },// Top Left
 
-{ -0.5f, -0.5f, 0.5f,
-    1.0f, 1.0f, 0.0f, 1.0f },// Bottom Left
+{ vec3(-0.5f, -0.5f, 0.5f),
+    vec4(1.0f, 1.0f, 0.0f, 1.0f) },// Bottom Left
 
-{ 0.5f, -0.5f, 0.5f,
-    0.0f, 1.0f, 1.0f, 1.0f }, //Bottom Right
+{ vec3(0.5f, -0.5f, 0.5f),
+    vec4(0.0f, 1.0f, 1.0f, 1.0f) }, //Bottom Right
 
-{ 0.5f, 0.5f, 0.5f,
-    1.0f, 0.0f, 1.0f, 1.0f },// Top Right
+{ vec3(0.5f, 0.5f, 0.5f),
+    vec4(1.0f, 0.0f, 1.0f, 1.0f) },// Top Right
 
 
 //back
-{ -0.5f, 0.5f, -0.5f,
-    1.0f, 0.0f, 1.0f, 1.0f },// Top Left
+{ vec3(-0.5f, 0.5f, -0.5f),
+    vec4(1.0f, 0.0f, 1.0f, 1.0f) },// Top Left
 
-{ -0.5f, -0.5f, -0.5f,
-    1.0f, 1.0f, 0.0f, 1.0f },// Bottom Left
+{ vec3(-0.5f, -0.5f, -0.5f),
+    vec4(1.0f, 1.0f, 0.0f, 1.0f) },// Bottom Left
 
-{ 0.5f, -0.5f, -0.5f,
-    0.0f, 1.0f, 1.0f, 1.0f }, //Bottom Right
+{ vec3(0.5f, -0.5f, -0.5f),
+    vec4(0.0f, 1.0f, 1.0f, 1.0f) }, //Bottom Right
 
-{ 0.5f, 0.5f, -0.5f,
-    1.0f, 0.0f, 1.0f, 1.0f },// Top Right
+{ vec3(0.5f, 0.5f, -0.5f),
+    vec4(1.0f, 0.0f, 1.0f, 1.0f) },// Top Right
 
 };
 
@@ -63,6 +63,7 @@ GLuint indices[]={
 mat4 viewMatrix;
 mat4 projMatrix;
 mat4 worldMatrix;
+mat4 MVPMatrix;
 
 GLuint VBO;
 GLuint EBO;
@@ -94,12 +95,12 @@ void initScene()
   glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void**)(3 * sizeof(float)));
 
   GLuint vertexShaderProgram=0;
-  string vsPath = ASSET_PATH + SHADER_PATH + "/simpleVS.glsl";
+  string vsPath = ASSET_PATH + SHADER_PATH + "/simpleColourVS.glsl";
   vertexShaderProgram = loadShaderFromFile(vsPath, VERTEX_SHADER);
   checkForCompilerErrors(vertexShaderProgram);
 
   GLuint fragmentShaderProgram=0;
-  string fsPath = ASSET_PATH + SHADER_PATH + "/simpleFS.glsl";
+  string fsPath = ASSET_PATH + SHADER_PATH + "/simpleColourFS.glsl";
   fragmentShaderProgram = loadShaderFromFile(fsPath, FRAGMENT_SHADER);
   checkForCompilerErrors(fragmentShaderProgram);
 
@@ -134,6 +135,7 @@ void update()
 
   worldMatrix= glm::translate(mat4(1.0f), vec3(0.0f,0.0f,0.0f));
 
+  MVPMatrix=projMatrix*viewMatrix*worldMatrix;
 }
 
 void render()
@@ -145,10 +147,9 @@ void render()
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     glUseProgram(shaderProgram);
-    
+
     GLint MVPLocation = glGetUniformLocation(shaderProgram, "MVP");
-    mat4 MVP = projMatrix*viewMatrix*worldMatrix;
-    glUniformMatrix4fv(MVPLocation, 1, GL_FALSE, glm::value_ptr(MVP));
+    glUniformMatrix4fv(MVPLocation, 1, GL_FALSE, glm::value_ptr(MVPMatrix));
 
     glBindVertexArray( VAO );
 
