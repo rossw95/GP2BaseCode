@@ -73,7 +73,7 @@ bool checkForLinkErrors(GLuint program)
     glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
     //The maxLength includes the NULL character
     string infoLog;
-    glGetShaderInfoLog(program, maxLength, &maxLength, &infoLog[0]);
+    glGetProgramInfoLog(program, maxLength, &maxLength, &infoLog[0]);
     cout << "Shader not linked " << infoLog << endl;
     //We don't need the shader anymore.
     glDeleteProgram(program);
