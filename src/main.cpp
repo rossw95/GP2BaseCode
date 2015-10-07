@@ -80,7 +80,7 @@ GLuint UIshaderProgram;
 GLuint diffuseMap;
 GLuint fontTextureMap;
 
-void initScene()
+void initUIScene()
 {
 	string fontPath =ASSET_PATH+FONT_PATH+"/OratorStd.otf";
 	fontTextureMap=loadTextureFromFont(fontPath,10,"Hello");
@@ -88,6 +88,49 @@ void initScene()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	int width, height; glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH,
+	&width); glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT,
+	&height);
+
+	Vertex spriteData[] = {
+		{ vec3(0.0, 0.0f, 0.0f), vec4(1.0f,1.0f, 1.0f, 1.0f), vec2(0.0f, 0.0f) },// Top Left
+
+		{ vec3(0.0f, height, 0.0f),vec4(1.0f, 1.0f, 1.0f, 1.0f),vec2(0.0f, 1.0f) },//Bottom Left
+
+		{ vec3(width, height, 0.0f), vec4(1.0f, 1.0f, 1.0f, 1.0f), vec2(1.0f, 1.0f) },//Bottom Right
+
+		{ vec3(width, 0.0f, 0.0f), vec4(1.0f, 1.0f, 1.0f, 1.0f), vec2(1.0f, 0.0f) }//Top Right
+
+	};
+
+	GLuint spriteIndices[]={ 0,1,2, 0,3,2, };
+
+	glGenVertexArrays(1, &UIVAO);
+	glBindVertexArray(UIVAO);
+	glGenBuffers(1, &UIVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, UIVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verts), spriteData, GL_STATIC_DRAW);
+
+	//create buffer
+	glGenBuffers(1, &UIEBO);
+	//Make the EBO active
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, UIEBO);
+	//Copy Index data to the EBO
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), spriteIndices, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), NULL);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void**)sizeof(vec3));
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void**)(sizeof(vec4) + sizeof(vec3)));
+
+}
+
+void initScene()
+{
+	initUIScene();
 
 	glBindTexture(GL_TEXTURE_2D, diffuseMap);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -307,6 +350,8 @@ int main(int argc, char * arg[])
 	cleanUp();
 	SDL_GL_DeleteContext(glcontext);
 	SDL_DestroyWindow(window);
+	IMG_Quit();
+	TTF_Quit();
 	SDL_Quit();
 
 	return 0;
