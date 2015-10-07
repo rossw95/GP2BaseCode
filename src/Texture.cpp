@@ -21,20 +21,29 @@ GLuint convertSDLSurfaceToTexture(SDL_Surface * surface)
 	GLint		nOfColors = surface->format->BytesPerPixel;
 
 	GLenum	textureFormat = GL_RGB;
+	GLenum	internalFormat = GL_RGB8;
 
 	if (nOfColors == 4)					//	contains	an	alpha	channel
 	{
-		if (surface->format->Rmask == 0x000000ff)
+		if (surface->format->Rmask == 0x000000ff){
 			textureFormat = GL_RGBA;
-		else
+			internalFormat = GL_RGBA8;
+		}
+		else{
 			textureFormat = GL_BGRA;
+			internalFormat = GL_RGBA8;
+		}
 	}
 	else if (nOfColors == 3)					//	no	alpha	channel
 	{
-		if (surface->format->Rmask == 0x000000ff)
+		if (surface->format->Rmask == 0x000000ff){
 			textureFormat = GL_RGB;
-		else
+			internalFormat = GL_RGB8;
+		}
+		else{
 			textureFormat = GL_BGR;
+			internalFormat = GL_RGB8;
+		}
 	}
 	else{
 		cout<< "warning: the image is not truecolor.. this will	probably break";
@@ -42,7 +51,7 @@ GLuint convertSDLSurfaceToTexture(SDL_Surface * surface)
 	}
 	glGenTextures(1, &textureID);
 	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, textureFormat, surface->w, surface->h, 0, textureFormat,
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, surface->w, surface->h, 0, textureFormat,
 		GL_UNSIGNED_BYTE, surface->pixels);
 
 	return textureID;
