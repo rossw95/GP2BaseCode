@@ -156,14 +156,13 @@ void update()
 	MVPMatrix = projMatrix*viewMatrix*worldMatrix;
 }
 
-void render()
+void render2D()
 {
-	//old imediate mode!
-	//Set the clear colour(background)
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	//clear the colour and depth buffer
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+}
+
+void render3D()
+{
 	glUseProgram(shaderProgram);
 
 	GLint MVPLocation = glGetUniformLocation(shaderProgram, "MVP");
@@ -178,6 +177,17 @@ void render()
 	glBindVertexArray(VAO);
 
 	glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(GLuint), GL_UNSIGNED_INT, 0);
+}
+
+void render()
+{
+	//old imediate mode!
+	//Set the clear colour(background)
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	//clear the colour and depth buffer
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	render2D();
+	render3D();
 }
 
 int main(int argc, char * arg[])
@@ -199,6 +209,10 @@ int main(int argc, char * arg[])
 	if (((returnInitFlags)&	(imageInitFlags)) != imageInitFlags)	{
 
 		cout << "ERROR	SDL_Image	Init	" << IMG_GetError() << endl;
+	}
+
+	if (TTF_Init() == -1)	{
+		std::cout << "ERROR	TTF_Init:	" << TTF_GetError();
 	}
 
 	//Request opengl 4.1 context, Core Context
