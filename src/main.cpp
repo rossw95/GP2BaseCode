@@ -71,10 +71,32 @@ GLuint EBO;
 GLuint VAO;
 GLuint shaderProgram;
 
+GLuint UIVBO;
+GLuint UIEBO;
+GLuint UIVAO;
+GLuint UIshaderProgram;
+
+
 GLuint diffuseMap;
+GLuint fontTextureMap;
 
 void initScene()
 {
+	string fontPath =ASSET_PATH+FONT_PATH+"/OratorStd.otf";
+	fontTextureMap=loadTextureFromFont(fontPath,10,"Hello");
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	glBindTexture(GL_TEXTURE_2D, diffuseMap);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+
 	//load texture & bind
 	string texturePath = ASSET_PATH + TEXTURE_PATH + "/texture.png";
 	diffuseMap = loadTextureFromFile(texturePath);
@@ -138,6 +160,7 @@ void initScene()
 
 void cleanUp()
 {
+	glDeleteTextures(1,&fontTextureMap);
 	glDeleteTextures(1, &diffuseMap);
 	glDeleteProgram(shaderProgram);
 	glDeleteBuffers(1, &EBO);
@@ -156,9 +179,12 @@ void update()
 	MVPMatrix = projMatrix*viewMatrix*worldMatrix;
 }
 
-void render2D()
+void renderUI()
 {
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	glDisable(GL_BLEND);
 }
 
 void render3D()
@@ -186,8 +212,9 @@ void render()
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	//clear the colour and depth buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	render2D();
+
 	render3D();
+	renderUI();
 }
 
 int main(int argc, char * arg[])

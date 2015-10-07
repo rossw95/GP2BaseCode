@@ -1,98 +1,93 @@
-# Locate SDL_image library
+# - Find SDL2_ttf
+# Find the native SDL2_ttf includes and libraries
 #
-# This module defines:
-#
-# ::
-#
-#   SDL_TTF_LIBRARIES, the name of the library to link against
-#   SDL_TTF_INCLUDE_DIRS, where to find the headers
-#   SDL_TTF_FOUND, if false, do not try to link against
-#   SDL_F_VERSION_STRING - human-readable string containing the version of SDL_ttf
-#
-#
-#
-# For backward compatiblity the following variables are also set:
-#
-# ::
-#
-#   SDLTTF_LIBRARY (same value as SDL_TTF_LIBRARIES)
-#   SDLTTF_INCLUDE_DIR (same value as SDL_TTF_INCLUDE_DIRS)
-#   SDLTTF_FOUND (same value as SDL_TTF_FOUND)
-#
-#
-#
-# $SDLDIR is an environment variable that would correspond to the
-# ./configure --prefix=$SDLDIR used in building SDL.
-#
-# Created by Eric Wing.  This was influenced by the FindSDL.cmake
-# module, but with modifications to recognize OS X frameworks and
-# additional Unix paths (FreeBSD, etc).
+#  SDL2_TTF_INCLUDE_DIR - where to find SDL2_ttf/SDL2_ttf.h, etc.
+#  SDL2_TTF_LIBRARIES   - List of libraries when using libSDL_ttf.
+#  SDL2_TTF_FOUND       - True if libSDL_ttf found.
 
-#=============================================================================
-# Copyright 2005-2009 Kitware, Inc.
-# Copyright 2012 Benjamin Eikel
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
+if(SDL2_TTF_INCLUDE_DIR)
+  # Already in cache, be silent
+  set(SDL2_TTF_FIND_QUIETLY TRUE)
+endif(SDL2_TTF_INCLUDE_DIR)
 
 find_path(SDL2_TTF_INCLUDE_DIR SDL_ttf.h
-  HINTS
-    ENV SDL2TTFDIR
-    ENV SDL2DIR
   PATH_SUFFIXES SDL2
-                # path suffixes to search inside ENV{SDLDIR}
-                include/SDL2 include
-)
+  PATHS
+  ~/Library/Frameworks
+  /Library/Frameworks
+  /usr/local
+  /usr
+  /sw          # Fink
+  /opt/local   # DarwinPorts
+  /opt/csw     # Blastwave
+  /opt
+  ${SDL2DIR}/include
+  $ENV{SDL2DIR}/include
+  ${SDL2_TTF_DIR}/include
+  $ENV{SDL2_TTF_DIR}/include)
 
-if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-  set(VC_LIB_PATH_SUFFIX lib/x64)
+find_library(SDL2_TTF_LIBRARY_DEBUG
+  NAMES SDL2_ttf-d SDL2_ttf-s-d
+  PATH_SUFFIXES lib64 lib
+  PATHS
+  ~/Library/Frameworks
+  /Library/Frameworks
+  /usr/local
+  /usr
+  /sw          # Fink
+  /opt/local   # DarwinPorts
+  /opt/csw     # Blastwave
+  /opt
+  ${SDL2_TTF_DIR}
+  $ENV{SDL2_TTF_DIR})
+
+find_library(SDL2_TTF_LIBRARY_RELEASE
+  NAMES SDL2_ttf SDL2_ttf-s
+  PATH_SUFFIXES lib64 lib
+  PATHS
+  ~/Library/Frameworks
+  /Library/Frameworks
+  /usr/local
+  /usr
+  /sw          # Fink
+  /opt/local   # DarwinPorts
+  /opt/csw     # Blastwave
+  /opt
+  ${SDL2_TTF_DIR}
+  $ENV{SDL2_TTF_DIR})
+
+if(SDL2_TTF_LIBRARY_DEBUG OR SDL2_TTF_LIBRARY_RELEASE)
+  # Library found
+  set(SDL2_TTF_FOUND TRUE)
+
+  # If both were found, set SDL2_TTF_LIBRARY to the release version
+  if(SDL2_TTF_LIBRARY_DEBUG AND SDL2_TTF_LIBRARY_RELEASE)
+    set(SDL2_TTF_LIBRARY ${SDL2_TTF_LIBRARY_RELEASE})
+  endif()
+
+  if(SDL2_TTF_LIBRARY_DEBUG AND NOT SDL2_TTF_LIBRARY_RELEASE)
+    set(SDL2_TTF_LIBRARY ${SDL2_TTF_LIBRARY_DEBUG})
+  endif()
+
+  if(NOT SDL2_TTF_LIBRARY_DEBUG AND SDL2_TTF_LIBRARY_RELEASE)
+    set(SDL2_TTF_LIBRARY ${SDL2_TTF_LIBRARY_RELEASE})
+  endif()
 else()
-  set(VC_LIB_PATH_SUFFIX lib/x86)
+  set(SDL2_TTF_FOUND FALSE)
 endif()
 
-find_library(SDL2_TTF_LIBRARY
-  NAMES SDL2_ttf
-  HINTS
-    ENV SDL2TTFDIR
-    ENV SDL2DIR
-  PATH_SUFFIXES lib ${VC_LIB_PATH_SUFFIX}
-)
-
-if(SDL2_TTF_INCLUDE_DIR AND EXISTS "${SDL2_TTF_INCLUDE_DIR}/SDL_ttf.h")
-  file(STRINGS "${SDL2_TTF_INCLUDE_DIR}/SDL_ttf.h" SDL_TTF_VERSION_MAJOR_LINE REGEX "^#define[ \t]+SDL_TTF_MAJOR_VERSION[ \t]+[0-9]+$")
-  file(STRINGS "${SDL2_TTF_INCLUDE_DIR}/SDL_ttf.h" SDL2_TTF_VERSION_MINOR_LINE REGEX "^#define[ \t]+SDL2_TTF_MINOR_VERSION[ \t]+[0-9]+$")
-  file(STRINGS "${SDL2_TTF_INCLUDE_DIR}/SDL_ttf.h" SDL2_TTF_VERSION_PATCH_LINE REGEX "^#define[ \t]+SDL2_TTF_PATCHLEVEL[ \t]+[0-9]+$")
-  string(REGEX REPLACE "^#define[ \t]+SDL2_TTF_MAJOR_VERSION[ \t]+([0-9]+)$" "\\1" SDL2_TTF_VERSION_MAJOR "${SDL2_TTF_VERSION_MAJOR_LINE}")
-  string(REGEX REPLACE "^#define[ \t]+SDL2_TTF_MINOR_VERSION[ \t]+([0-9]+)$" "\\1" SDL2_TTF_VERSION_MINOR "${SDL2_TTF_VERSION_MINOR_LINE}")
-  string(REGEX REPLACE "^#define[ \t]+SDL2_TTF_PATCHLEVEL[ \t]+([0-9]+)$" "\\1" SDL2_TTF_VERSION_PATCH "${SDL2_TTF_VERSION_PATCH_LINE}")
-  set(SDL2_TTF_VERSION_STRING ${SDL2_TTF_VERSION_MAJOR}.${SDL2_TTF_VERSION_MINOR}.${SDL2_TTF_VERSION_PATCH})
-  unset(SDL2_TTF_VERSION_MAJOR_LINE)
-  unset(SDL2_TTF_VERSION_MINOR_LINE)
-  unset(SDL2_TTF_VERSION_PATCH_LINE)
-  unset(SDL2_TTF_VERSION_MAJOR)
-  unset(SDL2_TTF_VERSION_MINOR)
-  unset(SDL2_TTF_VERSION_PATCH)
-endif()
-
-set(SDL2_TTF_LIBRARIES ${SDL2_TTF_LIBRARY})
-set(SDL2_TTF_INCLUDE_DIRS ${SDL2_TTF_INCLUDE_DIR})
-
+# Handle the QUIETLY and REQUIRED arguments and set SNDFILE_FOUND to TRUE if
+# all listed variables are TRUE.
 include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(SDL2_TTF DEFAULT_MSG SDL2_TTF_LIBRARY SDL2_TTF_INCLUDE_DIR)
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(SDL2_ttf
-                                  REQUIRED_VARS SDL2_TTF_LIBRARIES SDL2_TTF_INCLUDE_DIRS
-                                  VERSION_VAR SDL2_TTF_VERSION_STRING)
+if(SDL2_TTF_FOUND)
+  set(SDL2_TTF_LIBRARIES ${SDL2_TTF_LIBRARY})
+else(SDL2_TTF_FOUND)
+  set(SDL2_TTF_LIBRARIES)
+endif(SDL2_TTF_FOUND)
 
-# for backward compatiblity
-#set(SDLTTF_LIBRARY ${SDL_TTF_LIBRARIES})
-#set(SDLTTF_INCLUDE_DIR ${SDL_TTF_INCLUDE_DIRS})
-#set(SDLTTF_FOUND ${SDL_TTF_FOUND})
-
-mark_as_advanced(SDL2_TTF_LIBRARY SDL2_TTF_INCLUDE_DIR)
+mark_as_advanced(SDL2_TTF_INCLUDE_DIR
+  SDL2_TTF_LIBRARY
+  SDL2_TTF_LIBRARY_RELEASE
+  SDL2_TTF_LIBRARY_DEBUG)
