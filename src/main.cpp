@@ -66,6 +66,10 @@ mat4 projMatrix;
 mat4 worldMatrix;
 mat4 MVPMatrix;
 
+mat4 UIProjMatrix;
+mat4 UIWorldMatrix;
+mat4 UIMVPMatrix;
+
 GLuint VBO;
 GLuint EBO;
 GLuint VAO;
@@ -74,24 +78,27 @@ GLuint shaderProgram;
 GLuint UIVBO;
 GLuint UIEBO;
 GLuint UIVAO;
-GLuint UIshaderProgram;
+GLuint UIShaderProgram;
 
 
 GLuint diffuseMap;
 GLuint fontTextureMap;
 
+vec4 fontColour=vec4(1.0f,1.0f,1.0f,1.0f);
+
 void initUIScene()
 {
 	string fontPath =ASSET_PATH+FONT_PATH+"/OratorStd.otf";
-	fontTextureMap=loadTextureFromFont(fontPath,10,"Hello");
+	fontTextureMap=loadTextureFromFont(fontPath,20,"Hello");
+	glBindTexture(GL_TEXTURE_2D,fontTextureMap);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	int width, height; glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH,
-	&width); glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT,
-	&height);
+	int width, height;
+	glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
+	glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT,&height);
 
 	Vertex spriteData[] = {
 		{ vec3(0.0, 0.0f, 0.0f), vec4(1.0f,1.0f, 1.0f, 1.0f), vec2(0.0f, 0.0f) },// Top Left
@@ -126,26 +133,43 @@ void initUIScene()
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void**)(sizeof(vec4) + sizeof(vec3)));
 
+	GLuint vertexShaderProgram = 0;
+	string vsPath = ASSET_PATH + SHADER_PATH + "/UIVS.glsl";
+	vertexShaderProgram = loadShaderFromFile(vsPath, VERTEX_SHADER);
+	checkForCompilerErrors(vertexShaderProgram);
+
+	GLuint fragmentShaderProgram = 0;
+	string fsPath = ASSET_PATH + SHADER_PATH + "/UIFS.glsl";
+	fragmentShaderProgram = loadShaderFromFile(fsPath, FRAGMENT_SHADER);
+	checkForCompilerErrors(fragmentShaderProgram);
+
+	UIShaderProgram = glCreateProgram();
+	glAttachShader(UIShaderProgram, vertexShaderProgram);
+	glAttachShader(UIShaderProgram, fragmentShaderProgram);
+
+	//Link attributes
+	glBindAttribLocation(UIShaderProgram, 0, "vertexPosition");
+	glBindAttribLocation(UIShaderProgram, 1, "vertexColour");
+	glBindAttribLocation(UIShaderProgram, 2, "vertexTexCoords");
+
+	glLinkProgram(UIShaderProgram);
+	checkForLinkErrors(UIShaderProgram);
+	//now we can delete the VS & FS Programs
+	glDeleteShader(vertexShaderProgram);
+	glDeleteShader(fragmentShaderProgram);
+
 }
 
 void initScene()
 {
 	initUIScene();
 
-	glBindTexture(GL_TEXTURE_2D, diffuseMap);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-	glGenerateMipmap(GL_TEXTURE_2D);
-
-
 	//load texture & bind
 	string texturePath = ASSET_PATH + TEXTURE_PATH + "/texture.png";
 	diffuseMap = loadTextureFromFile(texturePath);
 
 	glBindTexture(GL_TEXTURE_2D, diffuseMap);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
@@ -201,9 +225,18 @@ void initScene()
 	glDeleteShader(fragmentShaderProgram);
 }
 
-void cleanUp()
+void cleanUPUI()
 {
 	glDeleteTextures(1,&fontTextureMap);
+	glDeleteProgram(UIShaderProgram);
+	glDeleteBuffers(1, &UIEBO);
+	glDeleteBuffers(1, &UIVBO);
+	glDeleteVertexArrays(1, &UIVAO);
+}
+
+void cleanUp()
+{
+	cleanUPUI();
 	glDeleteTextures(1, &diffuseMap);
 	glDeleteProgram(shaderProgram);
 	glDeleteBuffers(1, &EBO);
@@ -213,19 +246,41 @@ void cleanUp()
 
 void update()
 {
-	projMatrix = glm::perspective(45.0f, 640.0f / 480.0f, 0.1f, 100.0f);
+	projMatrix = perspective(45.0f, 640.0f / 480.0f, 0.1f, 100.0f);
 
-	viewMatrix = glm::lookAt(vec3(0.0f, 0.0f, 2.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
+	viewMatrix = lookAt(vec3(0.0f, 0.0f, 2.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
 
-	worldMatrix = glm::translate(mat4(1.0f), vec3(0.0f, 0.0f, 0.0f));
+	worldMatrix = translate(mat4(1.0f), vec3(0.0f, 0.0f, 0.0f));
 
 	MVPMatrix = projMatrix*viewMatrix*worldMatrix;
+
+	UIProjMatrix=ortho(0.0f, 640.0f,480.0f,0.0f, 0.1f, 100.0f);
+	UIWorldMatrix=translate(mat4(1.0f), vec3(100.0f, 100.0f, 0.0f));;
+
+	UIMVPMatrix=UIProjMatrix*viewMatrix*UIWorldMatrix;
 }
 
 void renderUI()
 {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glUseProgram(UIShaderProgram);
+
+	GLint MVPLocation = glGetUniformLocation(UIShaderProgram, "MVP");
+	GLint texture0Location = glGetUniformLocation(UIShaderProgram, "texture0");
+	GLint colourLocation=glGetUniformLocation(UIShaderProgram, "textColour");
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, fontTextureMap);
+
+	glUniformMatrix4fv(MVPLocation, 1, GL_FALSE, glm::value_ptr(UIMVPMatrix));
+	glUniform4fv(colourLocation,1,glm::value_ptr(fontColour));
+	glUniform1i(texture0Location, 0);
+
+	glBindVertexArray(UIVAO);
+
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 	glDisable(GL_BLEND);
 }
