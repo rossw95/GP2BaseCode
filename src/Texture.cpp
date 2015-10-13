@@ -67,8 +67,9 @@ GLuint convertSDLSurfaceToTexture(SDL_Surface * surface)
 		cout<< "warning: the image is not truecolor.. this will	probably break";
 		return 0;
 	}
+
 	glGenTextures(1, &textureID);
-	glActiveTexture(0);
+	glActiveTexture(TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, textureID);
 	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, surface->w, surface->h, 0, textureFormat,
 		GL_UNSIGNED_BYTE, surface->pixels);
