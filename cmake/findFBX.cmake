@@ -9,7 +9,7 @@
 # correspond to the ./configure --prefix=$FBX_DIR
 
 IF(APPLE)
-	    SET(FBX_LIBDIR "clang")
+	SET(FBX_LIBDIR "clang")
 ELSEIF(CMAKE_COMPILER_IS_GNUCXX)
   SET(FBX_LIBDIR "gcc4")
 ELSEIF(MSVC80)
@@ -44,7 +44,7 @@ ELSE()
   SET(FBX_LIBNAME "libfbxsdk-md")
 ENDIF()
 
-SET(FBX_LIBNAME_DEBUG ${FBX_LIBNAME}d)
+SET(FBX_LIBNAME_DEBUG ${FBX_LIBNAME})
 
 SET( FBX_SEARCH_PATHS
 	    $ENV{FBX_DIR}
@@ -62,22 +62,17 @@ SET( FBX_SEARCH_PATHS
 FIND_PATH(FBX_INCLUDE_DIR "fbxsdk.h"
   PATHS ${FBX_SEARCH_PATHS}
   PATH_SUFFIXES "include")
-  FIND_LIBRARY( FBX_LIBRARY ${FBX_LIBNAME}
+
+  FIND_LIBRARY( FBX_LIBRARY "${FBX_LIBNAME}.a"
     PATHS ${FBX_SEARCH_PATHS}
-  PATH_SUFFIXES "lib/${FBX_LIBDIR}/release" "lib/${FBX_LIBDIR}")
+  PATH_SUFFIXES "lib/${FBX_LIBDIR}/release")
 
 #Once one of the calls succeeds the result variable will be set and stored in the cache so that no call will search again.
 
 #no debug d suffix, search in debug folder only
-FIND_LIBRARY( FBX_LIBRARY_DEBUG ${FBX_LIBNAME}
+FIND_LIBRARY( FBX_LIBRARY_DEBUG "${FBX_LIBNAME}.a"
   PATHS ${FBX_SEARCH_PATHS}
-  PATH_SUFFIXES "lib/${FBX_LIBDIR}/debug")
-
-FIND_LIBRARY( FBX_LIBRARY_DEBUG ${FBX_LIBNAME_DEBUG}
-  PATHS ${FBX_SEARCH_PATHS}
-  PATH_SUFFIXES "lib/${FBX_LIBDIR}")
-
-MESSAGE("FBX Header "${FBX_INCLUDE_DIR})
+PATH_SUFFIXES "lib/${FBX_LIBDIR}/debug")
 
 IF(FBX_LIBRARY AND FBX_LIBRARY_DEBUG AND FBX_INCLUDE_DIR)
   SET(FBX_FOUND "YES")
