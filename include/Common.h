@@ -13,6 +13,7 @@ using namespace std;
 #include <SDL_Image.h>
 #include <SDL_ttf.h>
 #include <SDL_opengl.h>
+#include <fbxsdk.h>
 
 //maths headers
 #include <glm/glm.hpp>
@@ -25,5 +26,6 @@ const string ASSET_PATH = "assets";
 const string SHADER_PATH = "/shaders";
 const string TEXTURE_PATH = "/textures";
 const string FONT_PATH = "/fonts";
+const stirng MODEL_PATH="/models";
 
 #endif
