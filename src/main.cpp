@@ -74,7 +74,7 @@ void initScene()
 
 void cleanUp()
 {
-	glDeleteTextures(1, &diffuseMap);
+	//glDeleteTextures(1, &diffuseMap);
 	glDeleteProgram(shaderProgram);
 	glDeleteBuffers(1, &EBO);
 	glDeleteBuffers(1, &VBO);
@@ -100,6 +100,7 @@ void render()
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	//clear the colour and depth buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	/*
 	glUseProgram(shaderProgram);
 
 	GLint MVPLocation = glGetUniformLocation(shaderProgram, "MVP");
@@ -113,7 +114,7 @@ void render()
 
 	glBindVertexArray(VAO);
 
-	glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(GLuint), GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(GLuint), GL_UNSIGNED_INT, 0);*/
 }
 
 int main(int argc, char * arg[])
