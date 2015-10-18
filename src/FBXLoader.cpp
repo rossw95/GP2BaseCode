@@ -36,7 +36,7 @@ FbxString GetAttributeTypeName(FbxNodeAttribute::EType type) {
 	}
 }
 
-bool loadFBXFromFile(const string& filename,Vertex **pVerts,int **pIndices)
+bool loadFBXFromFile(const string& filename, MeshData *meshData)
 {
   level = 0;
 	// Initialize the SDK manager. This object handles memory management.
@@ -68,13 +68,13 @@ bool loadFBXFromFile(const string& filename,Vertex **pVerts,int **pIndices)
 		cout << "Root Node " << lRootNode->GetName() << endl;
 		for (int i = 0; i < lRootNode->GetChildCount(); i++)
 		{
-
+			processNode(lRootNode->GetChild(i),meshData);
 		}
 	}
   return true;
 }
 
-void processNode(FbxNode *node)
+void processNode(FbxNode *node, MeshData *meshData)
 {
 	PrintTabs();
 	const char* nodeName = node->GetName();
@@ -89,17 +89,17 @@ void processNode(FbxNode *node)
 	level++;
 	// Print the node's attributes.
 	for (int i = 0; i < node->GetNodeAttributeCount(); i++){
-		processAttribute(node->GetNodeAttributeByIndex(i));
+		processAttribute(node->GetNodeAttributeByIndex(i),meshData);
 	}
 
 	// Recursively print the children.
 	for (int j = 0; j < node->GetChildCount(); j++)
-		processNode(node->GetChild(j));
+		processNode(node->GetChild(j),meshData);
 	level--;
 	PrintTabs();
 }
 
-void processAttribute(FbxNodeAttribute * attribute)
+void processAttribute(FbxNodeAttribute * attribute, MeshData *meshData)
 {
 	if (!attribute) return;
 	FbxString typeName = GetAttributeTypeName(attribute->GetAttributeType());
@@ -108,13 +108,13 @@ void processAttribute(FbxNodeAttribute * attribute)
 	cout << "Attribute " << typeName.Buffer() << " Name " << attrName << std::endl;
 	switch (attribute->GetAttributeType()) {
 	case FbxNodeAttribute::eSkeleton: return;
-	case FbxNodeAttribute::eMesh: processMesh(attribute->GetNode()->GetMesh());
+	case FbxNodeAttribute::eMesh: processMesh(attribute->GetNode()->GetMesh(), meshData);
 	case FbxNodeAttribute::eCamera: return;
 	case FbxNodeAttribute::eLight: return;
 	}
 }
 
-void processMesh(FbxMesh * mesh)
+void processMesh(FbxMesh * mesh, MeshData *meshData)
 {
 
 	int numVerts = mesh->GetControlPointsCount();
@@ -137,8 +137,17 @@ void processMesh(FbxMesh * mesh)
 	processMeshNormals(mesh, pVerts, numVerts);
 	processMeshTextureCoords(mesh, pVerts, numVerts);
 
+	for (int i = 0; i < numVerts; i++)
+	{
+		meshData->vertices.push_back(pVerts[i]);
+	}
+	for (int i = 0; i < numIndices; i++)
+	{
+		meshData->indices.push_back(pIndices[i]);
+	}
 	//read texture coordinates
 	cout << "Vertices " << numVerts << " Indices " << numIndices << endl;
+
 
 	if (pVerts)
 	{

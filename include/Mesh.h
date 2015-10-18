@@ -1,33 +1,33 @@
+#ifndef _MESH_H
+#define _MESH_H
+
+#include <vector>
+
+using namespace std;
+
+
 #include "Vertices.h"
 
-struct Mesh
+struct MeshData
 {
+	vector<Vertex> vertices;
+	vector<int> indices;
 
-  Vertex *pVerts;
-  int numVerts;
-  int *pIndices;
-  int numIndices;
+	int getNumVerts()
+	{
+		return vertices.size();
+	};
 
-  public Mesh()
-  {
-    pVerts=NULL;
-    numVerts=0;
-    pIndices=NULL;
-    numIndices=0;
-  }
+	int getNumIndices()
+	{
+		return indices.size();
+	};
 
-  public ~Mesh()
-  {
-    if (pVerts)
-    {
-      delete[] pVerts;
-      pVerts=NULL;
-    }
-    if (pIndices)
-    {
-      delete[] pIndices;
-      pIndices=NULL;
-    }
-  }
-
+	~MeshData()
+	{
+		vertices.clear();
+		vertices.clear();
+	}
 };
+
+#endif
