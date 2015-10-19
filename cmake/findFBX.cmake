@@ -7,9 +7,13 @@
 #
 # $FBX_DIR is an environment variable that would
 # correspond to the ./configure --prefix=$FBX_DIR
+#
+# $LIB_VER is a variable defined for type -md or -mt, 
+# if not assumed plain lib
 
 IF(APPLE)
 	SET(FBX_LIBDIR "clang")
+	SET(FBX_LIBEXT "a")
 ELSEIF(CMAKE_COMPILER_IS_GNUCXX)
   SET(FBX_LIBDIR "gcc4")
 ELSEIF(MSVC80)
@@ -22,6 +26,7 @@ ELSEIF(MSVC11)
   SET(FBX_LIBDIR "vs2012")
 ELSEIF(MSVC12 OR MSVC_VERSION>1800)
   SET(FBX_LIBDIR "vs2013")
+  SET(FBX_LIBEXT "lib")
 ENDIF()
 
 IF(APPLE)
@@ -34,15 +39,7 @@ ELSE()
   SET(FBX_LIBDIR ${FBX_LIBDIR}/x86)
 ENDIF()
 
-#try to use 2015.1 or 2014.2 version
-
-IF(APPLE)
-  SET(FBX_LIBNAME "libfbxsdk")
-ELSEIF(CMAKE_COMPILER_IS_GNUCXX)
-  SET(FBX_LIBNAME "fbxsdk")
-ELSE()
-  SET(FBX_LIBNAME "libfbxsdk-md")
-ENDIF()
+SET(FBX_LIBNAME "libfbxsdk")
 
 SET(FBX_LIBNAME_DEBUG ${FBX_LIBNAME})
 
@@ -63,14 +60,14 @@ FIND_PATH(FBX_INCLUDE_DIR "fbxsdk.h"
   PATHS ${FBX_SEARCH_PATHS}
   PATH_SUFFIXES "include")
 
-  FIND_LIBRARY( FBX_LIBRARY "${FBX_LIBNAME}.a"
+  FIND_LIBRARY( FBX_LIBRARY "${FBX_LIBNAME}.${FBX_LIBEXT}"
     PATHS ${FBX_SEARCH_PATHS}
   PATH_SUFFIXES "lib/${FBX_LIBDIR}/release")
 
 #Once one of the calls succeeds the result variable will be set and stored in the cache so that no call will search again.
 
 #no debug d suffix, search in debug folder only
-FIND_LIBRARY( FBX_LIBRARY_DEBUG "${FBX_LIBNAME}.a"
+FIND_LIBRARY( FBX_LIBRARY_DEBUG "${FBX_LIBNAME}.${FBX_LIBEXT}"
   PATHS ${FBX_SEARCH_PATHS}
 PATH_SUFFIXES "lib/${FBX_LIBDIR}/debug")
 

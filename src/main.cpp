@@ -5,6 +5,7 @@
 #include "Texture.h"
 #include "Mesh.h"
 #include "FBXLoader.h"
+#include "FileSystem.h"
 
 
 //matrices
@@ -120,7 +121,7 @@ void render()
 
 int main(int argc, char * arg[])
 {
-
+	ChangeWorkingDirectory();
 	//Controls the game loop
 	bool run = true;
 

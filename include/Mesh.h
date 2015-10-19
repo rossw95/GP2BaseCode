@@ -1,12 +1,8 @@
 #ifndef _MESH_H
 #define _MESH_H
 
-#include <vector>
-
-using namespace std;
-
-
 #include "Vertices.h"
+#include "Common.h"
 
 struct MeshData
 {
@@ -26,7 +22,7 @@ struct MeshData
 	~MeshData()
 	{
 		vertices.clear();
-		vertices.clear();
+		indices.clear();
 	}
 };
 

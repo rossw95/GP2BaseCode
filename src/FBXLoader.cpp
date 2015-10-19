@@ -71,7 +71,9 @@ bool loadFBXFromFile(const string& filename, MeshData *meshData)
 			processNode(lRootNode->GetChild(i),meshData);
 		}
 	}
-  return true;
+
+	lImporter->Destroy();
+	return true;
 }
 
 void processNode(FbxNode *node, MeshData *meshData)
@@ -84,7 +86,7 @@ void processNode(FbxNode *node, MeshData *meshData)
 
 	cout << "Node " << nodeName << " Postion " << translation[0] << " " << translation[1] << " " << translation[2] << " "
 		<< " Rotation " << rotation[0] << " " << rotation[1] << " " << rotation[2] << " "
-		<< " Scale " << scaling[0] << " " << scaling[1] << " " << scaling[2] << std::endl;
+		<< " Scale " << scaling[0] << " " << scaling[1] << " " << scaling[2] << endl;
 
 	level++;
 	// Print the node's attributes.
@@ -105,9 +107,8 @@ void processAttribute(FbxNodeAttribute * attribute, MeshData *meshData)
 	FbxString typeName = GetAttributeTypeName(attribute->GetAttributeType());
 	FbxString attrName = attribute->GetName();
 	PrintTabs();
-	cout << "Attribute " << typeName.Buffer() << " Name " << attrName << std::endl;
+	cout << "Attribute " << typeName.Buffer() << " Name " << attrName << endl;
 	switch (attribute->GetAttributeType()) {
-	case FbxNodeAttribute::eSkeleton: return;
 	case FbxNodeAttribute::eMesh: processMesh(attribute->GetNode()->GetMesh(), meshData);
 	case FbxNodeAttribute::eCamera: return;
 	case FbxNodeAttribute::eLight: return;
@@ -129,12 +130,8 @@ void processMesh(FbxMesh * mesh, MeshData *meshData)
 		pVerts[i].position = vec3(currentVert[0], currentVert[1], currentVert[2]);
 		pVerts[i].colour= vec4(1.0f, 1.0f, 1.0f, 1.0f);
 		pVerts[i].texCoords = vec2(0.0f, 0.0f);
-		//pVerts[i].binormals = vec3(0.0f, 0.0f, 0.0f);
-		//pVerts[i].tangentNormals = vec3(0.0f, 0.0f, 0.0f);
 	}
 
-	//read normal
-	processMeshNormals(mesh, pVerts, numVerts);
 	processMeshTextureCoords(mesh, pVerts, numVerts);
 
 	for (int i = 0; i < numVerts; i++)
@@ -145,7 +142,6 @@ void processMesh(FbxMesh * mesh, MeshData *meshData)
 	{
 		meshData->indices.push_back(pIndices[i]);
 	}
-	//read texture coordinates
 	cout << "Vertices " << numVerts << " Indices " << numIndices << endl;
 
 
@@ -156,20 +152,6 @@ void processMesh(FbxMesh * mesh, MeshData *meshData)
 	}
 }
 
-void processMeshNormals(FbxMesh * mesh, Vertex * verts, int numVerts)
-{
-	for (int iPolygon = 0; iPolygon < mesh->GetPolygonCount(); iPolygon++) {
-		for (unsigned iPolygonVertex = 0; iPolygonVertex < 3; iPolygonVertex++) {
-			int fbxCornerIndex = mesh->GetPolygonVertex(iPolygon, iPolygonVertex);
-			FbxVector4 fbxNormal;
-			mesh->GetPolygonVertexNormal(iPolygon, iPolygonVertex, fbxNormal);
-			fbxNormal.Normalize();
-			//verts[fbxCornerIndex].normal.x = fbxNormal[0];
-			//verts[fbxCornerIndex].normal.y = fbxNormal[1];
-			//verts[fbxCornerIndex].normal.z = fbxNormal[2];
-		}
-	}
-}
 
 void processMeshTextureCoords(FbxMesh * mesh, Vertex * verts, int numVerts)
 {
@@ -187,6 +169,9 @@ void processMeshTextureCoords(FbxMesh * mesh, Vertex * verts, int numVerts)
 					break;
 				case FbxLayerElement::eByPolygonVertex:
 					iUVIndex = mesh->GetTextureUVIndex(iPolygon, iPolygonVertex, FbxLayerElement::eTextureDiffuse);
+					break;
+				case FbxLayerElement::eByPolygon:
+					iUVIndex = iPolygon;
 					break;
 				}
 				fbxUV = fbxLayerUV->GetDirectArray().GetAt(iUVIndex);
