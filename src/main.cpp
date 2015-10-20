@@ -3,62 +3,11 @@
 #include "Vertices.h"
 #include "Shader.h"
 #include "Texture.h"
-
-Vertex verts[] = {
-	//Front
-	{ vec3(-0.5f, 0.5f, 0.5f),
-	vec4(1.0f, 0.0f, 1.0f, 1.0f), vec2(0.0f, 0.0f) },// Top Left
-
-	{ vec3(-0.5f, -0.5f, 0.5f),
-	vec4(1.0f, 1.0f, 0.0f, 1.0f), vec2(0.0f, 1.0f) },// Bottom Left
-
-	{ vec3(0.5f, -0.5f, 0.5f),
-	vec4(0.0f, 1.0f, 1.0f, 1.0f), vec2(1.0f, 1.0f) }, //Bottom Right
-
-	{ vec3(0.5f, 0.5f, 0.5f),
-	vec4(1.0f, 0.0f, 1.0f, 1.0f), vec2(1.0f, 0.0f) },// Top Right
+#include "Mesh.h"
+#include "FileSystem.h"
+#include "FBXLoader.h"
 
 
-	//back
-	{ vec3(-0.5f, 0.5f, -0.5f),
-	vec4(1.0f, 0.0f, 1.0f, 1.0f), vec2(0.0f, 0.0f) },// Top Left
-
-	{ vec3(-0.5f, -0.5f, -0.5f),
-	vec4(1.0f, 1.0f, 0.0f, 1.0f), vec2(0.0f, 1.0f) },// Bottom Left
-
-	{ vec3(0.5f, -0.5f, -0.5f),
-	vec4(0.0f, 1.0f, 1.0f, 1.0f), vec2(1.0f, 1.0f) }, //Bottom Right
-
-	{ vec3(0.5f, 0.5f, -0.5f),
-	vec4(1.0f, 0.0f, 1.0f, 1.0f), vec2(1.0f, 0.0f) },// Top Right
-
-};
-
-GLuint indices[] = {
-	//front
-	0, 1, 2,
-	0, 3, 2,
-
-	//left
-	4, 5, 1,
-	4, 1, 0,
-
-	//right
-	3, 7, 2,
-	7, 6, 2,
-
-	//bottom
-	1, 5, 2,
-	6, 2, 5,
-
-	//top
-	4, 0, 7,
-	0, 7, 3,
-
-	//back
-	4, 5, 6,
-	4, 7, 6
-};
 
 //matrices
 mat4 viewMatrix;
@@ -71,12 +20,18 @@ GLuint EBO;
 GLuint VAO;
 GLuint shaderProgram;
 
+MeshData currentMesh;
+
 GLuint diffuseMap;
 
 void initScene()
 {
+
+
+	string modelPath = ASSET_PATH + MODEL_PATH + "/armoredrecon.fbx";
+	loadFBXFromFile(modelPath, &currentMesh);
 	//load texture & bind
-	string texturePath = ASSET_PATH + TEXTURE_PATH + "/texture.png";
+	string texturePath = ASSET_PATH + TEXTURE_PATH + "/armoredrecon_diff.png";
 	diffuseMap = loadTextureFromFile(texturePath);
 
 	glBindTexture(GL_TEXTURE_2D, diffuseMap);
@@ -91,14 +46,14 @@ void initScene()
 	glBindVertexArray(VAO);
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, currentMesh.getNumVerts()*sizeof(Vertex), &currentMesh.vertices[0], GL_STATIC_DRAW);
 
 	//create buffer
 	glGenBuffers(1, &EBO);
 	//Make the EBO active
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	//Copy Index data to the EBO
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, currentMesh.getNumberIndices()*sizeof(int), &currentMesh.indices[0], GL_STATIC_DRAW);
 
 	//Tell the shader that 0 is the position element
 	glEnableVertexAttribArray(0);
@@ -149,7 +104,7 @@ void update()
 {
 	projMatrix = glm::perspective(45.0f, 640.0f / 480.0f, 0.1f, 100.0f);
 
-	viewMatrix = glm::lookAt(vec3(0.0f, 0.0f, 2.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
+	viewMatrix = glm::lookAt(vec3(0.0f, 0.0f, 10.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
 
 	worldMatrix = glm::translate(mat4(1.0f), vec3(0.0f, 0.0f, 0.0f));
 
@@ -177,12 +132,12 @@ void render()
 
 	glBindVertexArray(VAO);
 
-	glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(GLuint), GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, currentMesh.getNumberIndices(), GL_UNSIGNED_INT, 0);
 }
 
 int main(int argc, char * arg[])
 {
-
+	ChangeWorkingDirectory();
 	//Controls the game loop
 	bool run = true;
 
