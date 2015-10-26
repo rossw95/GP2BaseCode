@@ -27,13 +27,18 @@ vec4 ambientLightColour=vec4(1.0f,1.0f,1.0f,1.0f);
 vec4 diffuseLightColour=vec4(1.0f,1.0f,1.0f,1.0f);
 vec4 diffuseMaterialColour=vec4(0.8f,0.8f,0.8f,1.0f);
 
+vec4 specularLightColour=vec4(1.0f,1.0f,1.0f,1.0f);
+vec4 specularMaterialColour=vec4(1.0f,1.0f,1.0f,1.0f);
+float specularPower=2.0f;
+
 vec3 lightDirection=vec3(0.0f,0.0f,1.0f);
+vec3 cameraPosition=vec3(0.0f,10.0f,50.0f);
 
 
 void initScene()
 {
 
-	string modelPath = ASSET_PATH + MODEL_PATH + "/armoredrecon.fbx";
+	string modelPath = ASSET_PATH + MODEL_PATH + "/utah-teapot.fbx";
 	loadFBXFromFile(modelPath, &currentMesh);
 	//Generate Vertex Array
 	glGenVertexArrays(1, &VAO);
@@ -61,15 +66,15 @@ void initScene()
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void**)(sizeof(vec3) + sizeof(vec4)));
 
 	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void**)(sizeof(vec3) + sizeof(vec4)+sizeof(vec2)));
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void**)(sizeof(vec3) + sizeof(vec4) + sizeof(vec2)));
 
 	GLuint vertexShaderProgram = 0;
-	string vsPath = ASSET_PATH + SHADER_PATH + "/diffuseVS.glsl";
+	string vsPath = ASSET_PATH + SHADER_PATH + "/simpleVS.glsl";
 	vertexShaderProgram = loadShaderFromFile(vsPath, VERTEX_SHADER);
 	checkForCompilerErrors(vertexShaderProgram);
 
 	GLuint fragmentShaderProgram = 0;
-	string fsPath = ASSET_PATH + SHADER_PATH + "/diffuseFS.glsl";
+	string fsPath = ASSET_PATH + SHADER_PATH + "/simpleFS.glsl";
 	fragmentShaderProgram = loadShaderFromFile(fsPath, FRAGMENT_SHADER);
 	checkForCompilerErrors(fragmentShaderProgram);
 
@@ -103,7 +108,7 @@ void update()
 {
 	projMatrix = perspective(45.0f, 640.0f / 480.0f, 0.1f, 100.0f);
 
-	viewMatrix = lookAt(vec3(0.0f, 0.0f, 10.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
+	viewMatrix = lookAt(cameraPosition, vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
 
 	worldMatrix = translate(mat4(1.0f), vec3(0.0f, 0.0f, 0.0f));
 
@@ -132,6 +137,11 @@ void render()
 	GLint diffuseLightMaterialLocation=glGetUniformLocation(shaderProgram,"diffuseMaterialColour");
 	GLint lightDirectionLocation=glGetUniformLocation(shaderProgram,"lightDirection");
 
+	GLint specularLightColourLocation=glGetUniformLocation(shaderProgram,"specularLightColour");
+	GLint specularLightMaterialLocation=glGetUniformLocation(shaderProgram,"specularMaterialColour");
+	GLint specularPowerLocation=glGetUniformLocation(shaderProgram,"specularPower");
+	GLint cameraPositionLocation=glGetUniformLocation(shaderProgram,"cameraPosition");
+
 	GLint modelLocation=glGetUniformLocation(shaderProgram,"Model");
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, value_ptr(worldMatrix));
 
@@ -141,6 +151,12 @@ void render()
 	glUniform4fv(diffuseLightColourLocation,1,value_ptr(diffuseLightColour));
 	glUniform4fv(diffuseLightMaterialLocation,1,value_ptr(diffuseMaterialColour));
 	glUniform3fv(lightDirectionLocation,1,value_ptr(lightDirection));
+
+	glUniform4fv(specularLightColourLocation,1,value_ptr(specularLightColour));
+	glUniform4fv(specularLightMaterialLocation,1,value_ptr(specularMaterialColour));
+	glUniform1f(specularPowerLocation,specularPower);
+	glUniform3fv(cameraPositionLocation,1,value_ptr(cameraPosition));
+
 
 	glBindVertexArray(VAO);
 
