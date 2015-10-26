@@ -21,8 +21,13 @@ GLuint shaderProgram;
 
 MeshData currentMesh;
 
-vec4 ambientMaterialColour=vec4(1.0f,1.0f,1.0f,1.0f);
+vec4 ambientMaterialColour=vec4(0.2f,0.2f,0.2f,1.0f);
 vec4 ambientLightColour=vec4(1.0f,1.0f,1.0f,1.0f);
+
+vec4 diffuseLightColour=vec4(1.0f,1.0f,1.0f,1.0f);
+vec4 diffuseMaterialColour=vec4(0.8f,0.8f,0.8f,1.0f);
+
+vec3 lightDirection=vec3(0.0f,0.0f,1.0f);
 
 
 void initScene()
@@ -55,13 +60,16 @@ void initScene()
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void**)(sizeof(vec3) + sizeof(vec4)));
 
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void**)(sizeof(vec3) + sizeof(vec4)+sizeof(vec2)));
+
 	GLuint vertexShaderProgram = 0;
-	string vsPath = ASSET_PATH + SHADER_PATH + "/ambientVS.glsl";
+	string vsPath = ASSET_PATH + SHADER_PATH + "/diffuseVS.glsl";
 	vertexShaderProgram = loadShaderFromFile(vsPath, VERTEX_SHADER);
 	checkForCompilerErrors(vertexShaderProgram);
 
 	GLuint fragmentShaderProgram = 0;
-	string fsPath = ASSET_PATH + SHADER_PATH + "/ambientFS.glsl";
+	string fsPath = ASSET_PATH + SHADER_PATH + "/diffuseFS.glsl";
 	fragmentShaderProgram = loadShaderFromFile(fsPath, FRAGMENT_SHADER);
 	checkForCompilerErrors(fragmentShaderProgram);
 
@@ -73,6 +81,7 @@ void initScene()
 	glBindAttribLocation(shaderProgram, 0, "vertexPosition");
 	glBindAttribLocation(shaderProgram, 1, "vertexColour");
 	glBindAttribLocation(shaderProgram, 2, "vertexTexCoords");
+	glBindAttribLocation(shaderProgram, 3, "vertexNormal");
 
 	glLinkProgram(shaderProgram);
 	checkForLinkErrors(shaderProgram);
@@ -94,7 +103,7 @@ void update()
 {
 	projMatrix = perspective(45.0f, 640.0f / 480.0f, 0.1f, 100.0f);
 
-	viewMatrix = lookAt(vec3(0.0f, 0.0f, 20.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
+	viewMatrix = lookAt(vec3(0.0f, 0.0f, 10.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
 
 	worldMatrix = translate(mat4(1.0f), vec3(0.0f, 0.0f, 0.0f));
 
@@ -119,8 +128,19 @@ void render()
 	GLint ambientLightColourLocation=glGetUniformLocation(shaderProgram,"ambientLightColour");
 	GLint ambientMaterialColourLocation=glGetUniformLocation(shaderProgram,"ambientMaterialColour");
 
+	GLint diffuseLightColourLocation=glGetUniformLocation(shaderProgram,"diffuseLightColour");
+	GLint diffuseLightMaterialLocation=glGetUniformLocation(shaderProgram,"diffuseMaterialColour");
+	GLint lightDirectionLocation=glGetUniformLocation(shaderProgram,"lightDirection");
+
+	GLint modelLocation=glGetUniformLocation(shaderProgram,"Model");
+	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, value_ptr(worldMatrix));
+
 	glUniform4fv(ambientLightColourLocation,1,value_ptr(ambientLightColour));
 	glUniform4fv(ambientMaterialColourLocation,1,value_ptr(ambientMaterialColour));
+
+	glUniform4fv(diffuseLightColourLocation,1,value_ptr(diffuseLightColour));
+	glUniform4fv(diffuseLightMaterialLocation,1,value_ptr(diffuseMaterialColour));
+	glUniform3fv(lightDirectionLocation,1,value_ptr(lightDirection));
 
 	glBindVertexArray(VAO);
 
