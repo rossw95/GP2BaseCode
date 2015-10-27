@@ -60,6 +60,9 @@ bool loadFBXFromFile(const string& filename, MeshData *meshData)
 	// Import the contents of the file into the scene.
 	lImporter->Import(lScene);
 
+	FbxGeometryConverter lGeomConverter(lSdkManager);
+	lGeomConverter.Triangulate(lScene, /*replace*/true);
+	
 	// Print the nodes of the scene and their attributes recursively.
 	// Note that we are not printing the root node because it should
 	// not contain any attributes.

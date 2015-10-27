@@ -15,5 +15,6 @@ uniform vec4 diffuseLightColour;
 void main()
 {
 	float diffuseTerm = dot(worldNormal, lightDirection);
-	FragColor = (ambientMaterialColour*ambientLightColour)+(diffuseMaterialColour*diffuseLightColour*diffuseTerm);
+	FragColor = (ambientMaterialColour*ambientLightColour)+
+	(diffuseMaterialColour*diffuseLightColour*diffuseTerm);
 }
