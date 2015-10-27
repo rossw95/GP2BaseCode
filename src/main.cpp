@@ -25,15 +25,14 @@ vec4 ambientMaterialColour=vec4(0.2f,0.2f,0.2f,1.0f);
 vec4 ambientLightColour=vec4(1.0f,1.0f,1.0f,1.0f);
 
 vec4 diffuseLightColour=vec4(1.0f,1.0f,1.0f,1.0f);
-vec4 diffuseMaterialColour=vec4(0.8f,0.8f,0.8f,1.0f);
+vec4 diffuseMaterialColour=vec4(1.0f,0.0f,0.0f,1.0f);
 
 vec4 specularLightColour=vec4(1.0f,1.0f,1.0f,1.0f);
 vec4 specularMaterialColour=vec4(1.0f,1.0f,1.0f,1.0f);
-float specularPower=2.0f;
+float specularPower=25.0f;
 
 vec3 lightDirection=vec3(0.0f,0.0f,1.0f);
 vec3 cameraPosition=vec3(0.0f,10.0f,50.0f);
-
 
 void initScene()
 {
