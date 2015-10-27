@@ -64,6 +64,9 @@ bool loadFBXFromFile(const string& filename, MeshData *meshData)
 	// Import the contents of the file into the scene.
 	lImporter->Import(lScene);
 
+	FbxGeometryConverter lGeomConverter(lSdkManager);
+	lGeomConverter.Triangulate(lScene, /*replace*/true);
+
 	// Process Nodes
 	FbxNode* lRootNode = lScene->GetRootNode();
 	if (lRootNode) {
@@ -141,6 +144,7 @@ void processMesh(FbxMesh * mesh, MeshData *meshData)
 	}
 
 	processMeshTextureCoords(mesh, pVerts, numVerts);
+	processMeshNormals(mesh, pVerts, numVerts);
 
 	for (int i = 0; i < numVerts; i++)
 	{
@@ -194,7 +198,20 @@ void processMeshTextureCoords(FbxMesh * mesh, Vertex * verts, int numVerts)
 			}
 		}
 	}
+}
 
-
-
+void processMeshNormals(FbxMesh * mesh, Vertex * verts, int numVerts)
+{
+	for (int iPolygon = 0; iPolygon < mesh->GetPolygonCount(); iPolygon++) {
+		for (unsigned iPolygonVertex = 0; iPolygonVertex < 3; iPolygonVertex++) {
+			int fbxCornerIndex = mesh->GetPolygonVertex(iPolygon,
+				iPolygonVertex);
+			FbxVector4 fbxNormal;
+			mesh->GetPolygonVertexNormal(iPolygon, iPolygonVertex, fbxNormal);
+			fbxNormal.Normalize();
+			verts[fbxCornerIndex].normal.x = fbxNormal[0];
+			verts[fbxCornerIndex].normal.y = fbxNormal[1];
+			verts[fbxCornerIndex].normal.z = fbxNormal[2];
+		}
+	}
 }

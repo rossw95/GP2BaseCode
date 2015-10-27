@@ -23,16 +23,18 @@ GLuint shaderProgram;
 MeshData currentMesh;
 
 GLuint diffuseMap;
+vec4 ambientMaterialColour(0.3f, 0.3f, 0.3f, 1.0f);
+vec4 ambientLightColour(1.0f, 1.0f, 1.0f, 1.0f);
 
 void initScene()
 {
 
 
-	string modelPath = ASSET_PATH + MODEL_PATH + "/armoredrecon.fbx";
+	string modelPath = ASSET_PATH + MODEL_PATH + "/Utah-Teapot.fbx";
 	loadFBXFromFile(modelPath, &currentMesh);
 	//load texture & bind
-	string texturePath = ASSET_PATH + TEXTURE_PATH + "/armoredrecon_diff.png";
-	diffuseMap = loadTextureFromFile(texturePath);
+	//string texturePath = ASSET_PATH + TEXTURE_PATH + "/armoredrecon_diff.png";
+	//diffuseMap = loadTextureFromFile(texturePath);
 
 	glBindTexture(GL_TEXTURE_2D, diffuseMap);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -66,12 +68,12 @@ void initScene()
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void**)(sizeof(vec3) + sizeof(vec4)));
 
 	GLuint vertexShaderProgram = 0;
-	string vsPath = ASSET_PATH + SHADER_PATH + "/textureVS.glsl";
+	string vsPath = ASSET_PATH + SHADER_PATH + "/ambientVS.glsl";
 	vertexShaderProgram = loadShaderFromFile(vsPath, VERTEX_SHADER);
 	checkForCompilerErrors(vertexShaderProgram);
 
 	GLuint fragmentShaderProgram = 0;
-	string fsPath = ASSET_PATH + SHADER_PATH + "/textureFS.glsl";
+	string fsPath = ASSET_PATH + SHADER_PATH + "/ambientFS.glsl";
 	fragmentShaderProgram = loadShaderFromFile(fsPath, FRAGMENT_SHADER);
 	checkForCompilerErrors(fragmentShaderProgram);
 
@@ -104,7 +106,7 @@ void update()
 {
 	projMatrix = glm::perspective(45.0f, 640.0f / 480.0f, 0.1f, 100.0f);
 
-	viewMatrix = glm::lookAt(vec3(0.0f, 0.0f, 10.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
+	viewMatrix = glm::lookAt(vec3(0.0f, 0.0f, 50.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
 
 	worldMatrix = glm::translate(mat4(1.0f), vec3(0.0f, 0.0f, 0.0f));
 
@@ -123,6 +125,8 @@ void render()
 
 	GLint MVPLocation = glGetUniformLocation(shaderProgram, "MVP");
 	GLint texture0Location = glGetUniformLocation(shaderProgram, "texture0");
+	GLint ambientLightColourLocaton = glGetUniformLocation(shaderProgram, "ambientLightColour");
+	GLint ambientMaterialColourLocation = glGetUniformLocation(shaderProgram, "ambientMaterialColour");
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, diffuseMap);
@@ -130,6 +134,8 @@ void render()
 	glUniformMatrix4fv(MVPLocation, 1, GL_FALSE, glm::value_ptr(MVPMatrix));
 	glUniform1i(texture0Location, 0);
 
+	glUniform4fv(ambientLightColourLocaton, 1, glm::value_ptr(ambientLightColour));
+	glUniform4fv(ambientMaterialColourLocation, 1, glm::value_ptr(ambientMaterialColour));
 	glBindVertexArray(VAO);
 
 	glDrawElements(GL_TRIANGLES, currentMesh.getNumberIndices(), GL_UNSIGNED_INT, 0);
