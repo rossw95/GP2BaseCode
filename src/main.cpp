@@ -34,6 +34,8 @@ float specularPower=25.0f;
 vec3 lightDirection=vec3(0.0f,0.0f,1.0f);
 vec3 cameraPosition=vec3(0.0f,10.0f,50.0f);
 
+vec3 teapotRotation=vec3(0.0f,0.0f,0.0f);
+
 void initScene()
 {
 
@@ -110,9 +112,7 @@ void update()
 	projMatrix = perspective(45.0f, 640.0f / 480.0f, 0.1f, 100.0f);
 
 	viewMatrix = lookAt(cameraPosition, vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
-
-	worldMatrix = translate(mat4(1.0f), vec3(0.0f, 0.0f, 0.0f));
-
+	
 	MVPMatrix = projMatrix*viewMatrix*worldMatrix;
 }
 
