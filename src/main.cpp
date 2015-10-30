@@ -25,6 +25,13 @@ MeshData currentMesh;
 GLuint diffuseMap;
 vec4 ambientMaterialColour(0.3f, 0.3f, 0.3f, 1.0f);
 vec4 ambientLightColour(1.0f, 1.0f, 1.0f, 1.0f);
+vec3 lightDirection(0.0f, 0.0f, 1.0f);
+vec4 diffuseLightColour(0.1f, 0.6, 0.5f, 1.0f);
+vec4 diffuseMatteralColour(1.0f, 1.0f, 1.0f, 1.0f); 
+vec3 cameraPosition(0.0f, 0.0f, 50.0f);
+vec4 specularMaterialColour(0.0f, 0.0f, 0.0f, 0.0f);
+float specularPower = 1.0f;
+vec4 specularLightColour(0.5f, 0.2f, 0.3, 1.0f);
 
 void initScene()
 {
@@ -68,12 +75,12 @@ void initScene()
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void**)(sizeof(vec3) + sizeof(vec4)));
 
 	GLuint vertexShaderProgram = 0;
-	string vsPath = ASSET_PATH + SHADER_PATH + "/ambientVS.glsl";
+	string vsPath = ASSET_PATH + SHADER_PATH + "/specularVS.glsl";
 	vertexShaderProgram = loadShaderFromFile(vsPath, VERTEX_SHADER);
 	checkForCompilerErrors(vertexShaderProgram);
 
 	GLuint fragmentShaderProgram = 0;
-	string fsPath = ASSET_PATH + SHADER_PATH + "/ambientFS.glsl";
+	string fsPath = ASSET_PATH + SHADER_PATH + "/specularFS.glsl";
 	fragmentShaderProgram = loadShaderFromFile(fsPath, FRAGMENT_SHADER);
 	checkForCompilerErrors(fragmentShaderProgram);
 
@@ -124,9 +131,19 @@ void render()
 	glUseProgram(shaderProgram);
 
 	GLint MVPLocation = glGetUniformLocation(shaderProgram, "MVP");
+	GLint ModelLocation = glGetUniformLocation(shaderProgram, "Model");
 	GLint texture0Location = glGetUniformLocation(shaderProgram, "texture0");
 	GLint ambientLightColourLocaton = glGetUniformLocation(shaderProgram, "ambientLightColour");
 	GLint ambientMaterialColourLocation = glGetUniformLocation(shaderProgram, "ambientMaterialColour");
+	GLint diffuseMaterialColourLocation = glGetUniformLocation(shaderProgram, "diffuseMaterialColour");
+	GLint diffuseLightColourLocation = glGetUniformLocation(shaderProgram, "diffuseLightColour");
+	GLint lightDirectionLocation = glGetUniformLocation(shaderProgram, "lightDirection");
+	GLint cameraPositionLocatoin = glGetUniformLocation(shaderProgram, "cameraPosition");
+	GLint specularMaterialColourLocation = glGetUniformLocation(shaderProgram, "specularMaterialColour");
+	GLint specularPowerLocation = glGetUniformLocation(shaderProgram, "specularPower");
+	GLint specularLightColour = glGetUniformLocation(shaderProgram, "specularLightColour");
+
+
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, diffuseMap);
