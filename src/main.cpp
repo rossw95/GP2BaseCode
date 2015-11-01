@@ -38,6 +38,7 @@ vec3 cameraPosition=vec3(0.0f,10.0f,50.0f);
 GLuint FBOTexture;
 GLuint FBODepthBuffer;
 GLuint frameBufferObject;
+GLuint fullScreenVAO;
 GLuint fullScreenVBO;
 GLuint fullScreenShaderProgram;
 const int FRAME_BUFFER_WIDTH = 640;
@@ -56,11 +57,10 @@ void createFramebuffer()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0, GL_RGBA,
 		GL_UNSIGNED_BYTE, NULL);
 
-	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glGenRenderbuffers(1, &FBODepthBuffer);
 	glBindRenderbuffer(GL_RENDERBUFFER, FBODepthBuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, 640, 480);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
 	glGenFramebuffers(1, &frameBufferObject);
@@ -80,10 +80,22 @@ void createFramebuffer()
 
 	};
 
+	glGenVertexArrays(1, &fullScreenVAO);
+	glBindVertexArray(fullScreenVAO);
+
 	glGenBuffers(1, &fullScreenVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, fullScreenVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(
+		0,  // attribute
+		2,                  // number of elements per vertex, here (x,y)
+		GL_FLOAT,           // the type of each element
+		GL_FALSE,           // take our values as-is
+		0,                  // no extra data between each position
+		0                   // offset of first element
+		);
 
 	GLuint vertexShaderProgram = 0;
 	string vsPath = ASSET_PATH + SHADER_PATH + "/simplePostProcessVS.glsl";
@@ -175,6 +187,7 @@ void cleanUpFrambuffer()
 {
 	glDeleteProgram(fullScreenShaderProgram);
 	glDeleteBuffers(1, &fullScreenVBO);
+	glDeleteVertexArrays(1, &fullScreenVAO);
 	glDeleteFramebuffers(1, &frameBufferObject);
 	glDeleteRenderbuffers(1, &FBODepthBuffer);
 	glDeleteTextures(1, &FBOTexture);
@@ -202,7 +215,7 @@ void renderScene()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBufferObject);
 	//Set the clear colour(background)
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	//clear the colour and depth buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -249,7 +262,7 @@ void renderPostQuad()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	//Set the clear colour(background)
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	//clear the colour and depth buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -258,22 +271,12 @@ void renderPostQuad()
 	GLint textureLocation = glGetUniformLocation(fullScreenShaderProgram, "texture0");
 	
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(0, FBOTexture);
+	glBindTexture(GL_TEXTURE_2D, FBOTexture);
 	glUniform1i(textureLocation, 0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, fullScreenVBO);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(
-		0,  // attribute
-		2,                  // number of elements per vertex, here (x,y)
-		GL_FLOAT,           // the type of each element
-		GL_FALSE,           // take our values as-is
-		0,                  // no extra data between each position
-		0                   // offset of first element
-		);
+	glBindVertexArray(fullScreenVAO);
 
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	glDisableVertexAttribArray(0);
 
 }
 
