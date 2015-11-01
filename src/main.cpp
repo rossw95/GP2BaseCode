@@ -34,11 +34,84 @@ float specularPower=25.0f;
 vec3 lightDirection=vec3(0.0f,0.0f,1.0f);
 vec3 cameraPosition=vec3(0.0f,10.0f,50.0f);
 
-vec3 teapotRotation=vec3(0.0f,0.0f,0.0f);
+//for Framebuffer
+GLuint FBOTexture;
+GLuint FBODepthBuffer;
+GLuint frameBufferObject;
+GLuint fullScreenVBO;
+GLuint fullScreenShaderProgram;
+const int FRAME_BUFFER_WIDTH = 640;
+const int FRAME_BUFFER_HEIGHT = 480;
+
+
+void createFramebuffer()
+{
+	glActiveTexture(GL_TEXTURE0);
+	glGenTextures(1, &FBOTexture);
+	glBindTexture(GL_TEXTURE_2D, FBOTexture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0, GL_RGBA,
+		GL_UNSIGNED_BYTE, NULL);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glGenRenderbuffers(1, &FBODepthBuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, FBODepthBuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, 640, 480);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+	glGenFramebuffers(1, &frameBufferObject);
+	glBindFramebuffer(GL_FRAMEBUFFER, frameBufferObject);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D, FBOTexture, 0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,GL_RENDERBUFFER, FBODepthBuffer);
+
+	GLenum status;
+	if ((status = glCheckFramebufferStatus(GL_FRAMEBUFFER)) != GL_FRAMEBUFFER_COMPLETE) {
+		cout << "Issue with Framebuffers" << endl;
+	}
+	float vertices[] = {
+		-1, -1,
+		1, -1,
+		-1, 1,
+		1, 1,
+
+	};
+
+	glGenBuffers(1, &fullScreenVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, fullScreenVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	GLuint vertexShaderProgram = 0;
+	string vsPath = ASSET_PATH + SHADER_PATH + "/simplePostProcessVS.glsl";
+	vertexShaderProgram = loadShaderFromFile(vsPath, VERTEX_SHADER);
+	checkForCompilerErrors(vertexShaderProgram);
+
+	GLuint fragmentShaderProgram = 0;
+	string fsPath = ASSET_PATH + SHADER_PATH + "/simplePostProcessFS.glsl";
+	fragmentShaderProgram = loadShaderFromFile(fsPath, FRAGMENT_SHADER);
+	checkForCompilerErrors(fragmentShaderProgram);
+
+	fullScreenShaderProgram = glCreateProgram();
+	glAttachShader(fullScreenShaderProgram, vertexShaderProgram);
+	glAttachShader(fullScreenShaderProgram, fragmentShaderProgram);
+
+	//Link attributes
+	glBindAttribLocation(fullScreenShaderProgram, 0, "vertexPosition");
+
+	glLinkProgram(fullScreenShaderProgram);
+	checkForLinkErrors(fullScreenShaderProgram);
+	//now we can delete the VS & FS Programs
+	glDeleteShader(vertexShaderProgram);
+	glDeleteShader(fragmentShaderProgram);
+}
 
 void initScene()
 {
-
+	createFramebuffer();
 	string modelPath = ASSET_PATH + MODEL_PATH + "/utah-teapot.fbx";
 	loadFBXFromFile(modelPath, &currentMesh);
 	//Generate Vertex Array
@@ -98,9 +171,18 @@ void initScene()
 	glDeleteShader(fragmentShaderProgram);
 }
 
+void cleanUpFrambuffer()
+{
+	glDeleteProgram(fullScreenShaderProgram);
+	glDeleteBuffers(1, &fullScreenVBO);
+	glDeleteFramebuffers(1, &frameBufferObject);
+	glDeleteRenderbuffers(1, &FBODepthBuffer);
+	glDeleteTextures(1, &FBOTexture);
+}
+
 void cleanUp()
 {
-	//glDeleteTextures(1, &diffuseMap);
+	cleanUpFrambuffer();
 	glDeleteProgram(shaderProgram);
 	glDeleteBuffers(1, &EBO);
 	glDeleteBuffers(1, &VBO);
@@ -116,10 +198,9 @@ void update()
 	MVPMatrix = projMatrix*viewMatrix*worldMatrix;
 }
 
-
-void render()
+void renderScene()
 {
-	//old imediate mode!
+	glBindFramebuffer(GL_FRAMEBUFFER, frameBufferObject);
 	//Set the clear colour(background)
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	//clear the colour and depth buffer
@@ -131,37 +212,75 @@ void render()
 
 	glUniformMatrix4fv(MVPLocation, 1, GL_FALSE, value_ptr(MVPMatrix));
 
-	GLint ambientLightColourLocation=glGetUniformLocation(shaderProgram,"ambientLightColour");
-	GLint ambientMaterialColourLocation=glGetUniformLocation(shaderProgram,"ambientMaterialColour");
+	GLint ambientLightColourLocation = glGetUniformLocation(shaderProgram, "ambientLightColour");
+	GLint ambientMaterialColourLocation = glGetUniformLocation(shaderProgram, "ambientMaterialColour");
 
-	GLint diffuseLightColourLocation=glGetUniformLocation(shaderProgram,"diffuseLightColour");
-	GLint diffuseLightMaterialLocation=glGetUniformLocation(shaderProgram,"diffuseMaterialColour");
-	GLint lightDirectionLocation=glGetUniformLocation(shaderProgram,"lightDirection");
+	GLint diffuseLightColourLocation = glGetUniformLocation(shaderProgram, "diffuseLightColour");
+	GLint diffuseLightMaterialLocation = glGetUniformLocation(shaderProgram, "diffuseMaterialColour");
+	GLint lightDirectionLocation = glGetUniformLocation(shaderProgram, "lightDirection");
 
-	GLint specularLightColourLocation=glGetUniformLocation(shaderProgram,"specularLightColour");
-	GLint specularLightMaterialLocation=glGetUniformLocation(shaderProgram,"specularMaterialColour");
-	GLint specularPowerLocation=glGetUniformLocation(shaderProgram,"specularPower");
-	GLint cameraPositionLocation=glGetUniformLocation(shaderProgram,"cameraPosition");
+	GLint specularLightColourLocation = glGetUniformLocation(shaderProgram, "specularLightColour");
+	GLint specularLightMaterialLocation = glGetUniformLocation(shaderProgram, "specularMaterialColour");
+	GLint specularPowerLocation = glGetUniformLocation(shaderProgram, "specularPower");
+	GLint cameraPositionLocation = glGetUniformLocation(shaderProgram, "cameraPosition");
 
-	GLint modelLocation=glGetUniformLocation(shaderProgram,"Model");
+	GLint modelLocation = glGetUniformLocation(shaderProgram, "Model");
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, value_ptr(worldMatrix));
 
-	glUniform4fv(ambientLightColourLocation,1,value_ptr(ambientLightColour));
-	glUniform4fv(ambientMaterialColourLocation,1,value_ptr(ambientMaterialColour));
+	glUniform4fv(ambientLightColourLocation, 1, value_ptr(ambientLightColour));
+	glUniform4fv(ambientMaterialColourLocation, 1, value_ptr(ambientMaterialColour));
 
-	glUniform4fv(diffuseLightColourLocation,1,value_ptr(diffuseLightColour));
-	glUniform4fv(diffuseLightMaterialLocation,1,value_ptr(diffuseMaterialColour));
-	glUniform3fv(lightDirectionLocation,1,value_ptr(lightDirection));
+	glUniform4fv(diffuseLightColourLocation, 1, value_ptr(diffuseLightColour));
+	glUniform4fv(diffuseLightMaterialLocation, 1, value_ptr(diffuseMaterialColour));
+	glUniform3fv(lightDirectionLocation, 1, value_ptr(lightDirection));
 
-	glUniform4fv(specularLightColourLocation,1,value_ptr(specularLightColour));
-	glUniform4fv(specularLightMaterialLocation,1,value_ptr(specularMaterialColour));
-	glUniform1f(specularPowerLocation,specularPower);
-	glUniform3fv(cameraPositionLocation,1,value_ptr(cameraPosition));
+	glUniform4fv(specularLightColourLocation, 1, value_ptr(specularLightColour));
+	glUniform4fv(specularLightMaterialLocation, 1, value_ptr(specularMaterialColour));
+	glUniform1f(specularPowerLocation, specularPower);
+	glUniform3fv(cameraPositionLocation, 1, value_ptr(cameraPosition));
 
 
 	glBindVertexArray(VAO);
 
 	glDrawElements(GL_TRIANGLES, currentMesh.getNumIndices(), GL_UNSIGNED_INT, 0);
+}
+
+void renderPostQuad()
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//Set the clear colour(background)
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	//clear the colour and depth buffer
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUseProgram(fullScreenShaderProgram);
+
+	GLint textureLocation = glGetUniformLocation(fullScreenShaderProgram, "texture0");
+	
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(0, FBOTexture);
+	glUniform1i(textureLocation, 0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, fullScreenVBO);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(
+		0,  // attribute
+		2,                  // number of elements per vertex, here (x,y)
+		GL_FLOAT,           // the type of each element
+		GL_FALSE,           // take our values as-is
+		0,                  // no extra data between each position
+		0                   // offset of first element
+		);
+
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glDisableVertexAttribArray(0);
+
+}
+
+void render()
+{
+	renderScene();
+	renderPostQuad();
 }
 
 int main(int argc, char * arg[])
