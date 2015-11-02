@@ -41,6 +41,7 @@ GLuint frameBufferObject;
 GLuint fullScreenVAO;
 GLuint fullScreenVBO;
 GLuint fullScreenShaderProgram;
+
 const int FRAME_BUFFER_WIDTH = 640;
 const int FRAME_BUFFER_HEIGHT = 480;
 
@@ -60,7 +61,7 @@ void createFramebuffer()
 
 	glGenRenderbuffers(1, &FBODepthBuffer);
 	glBindRenderbuffer(GL_RENDERBUFFER, FBODepthBuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
 	glGenFramebuffers(1, &frameBufferObject);
@@ -103,7 +104,7 @@ void createFramebuffer()
 	checkForCompilerErrors(vertexShaderProgram);
 
 	GLuint fragmentShaderProgram = 0;
-	string fsPath = ASSET_PATH + SHADER_PATH + "/simplePostProcessFS.glsl";
+	string fsPath = ASSET_PATH + SHADER_PATH + "/colourFilterFS.glsl";
 	fragmentShaderProgram = loadShaderFromFile(fsPath, FRAGMENT_SHADER);
 	checkForCompilerErrors(fragmentShaderProgram);
 
@@ -183,7 +184,7 @@ void initScene()
 	glDeleteShader(fragmentShaderProgram);
 }
 
-void cleanUpFrambuffer()
+void cleanUpFramebuffer()
 {
 	glDeleteProgram(fullScreenShaderProgram);
 	glDeleteBuffers(1, &fullScreenVBO);
@@ -195,7 +196,7 @@ void cleanUpFrambuffer()
 
 void cleanUp()
 {
-	cleanUpFrambuffer();
+	cleanUpFramebuffer();
 	glDeleteProgram(shaderProgram);
 	glDeleteBuffers(1, &EBO);
 	glDeleteBuffers(1, &VBO);
@@ -207,7 +208,7 @@ void update()
 	projMatrix = perspective(45.0f, 640.0f / 480.0f, 0.1f, 100.0f);
 
 	viewMatrix = lookAt(cameraPosition, vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
-	
+
 	MVPMatrix = projMatrix*viewMatrix*worldMatrix;
 }
 
@@ -258,7 +259,7 @@ void renderScene()
 	glDrawElements(GL_TRIANGLES, currentMesh.getNumIndices(), GL_UNSIGNED_INT, 0);
 }
 
-void renderPostQuad()
+void renderPostProcessing()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	//Set the clear colour(background)
@@ -269,7 +270,7 @@ void renderPostQuad()
 	glUseProgram(fullScreenShaderProgram);
 
 	GLint textureLocation = glGetUniformLocation(fullScreenShaderProgram, "texture0");
-	
+
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, FBOTexture);
 	glUniform1i(textureLocation, 0);
@@ -283,7 +284,7 @@ void renderPostQuad()
 void render()
 {
 	renderScene();
-	renderPostQuad();
+	renderPostProcessing();
 }
 
 int main(int argc, char * arg[])
