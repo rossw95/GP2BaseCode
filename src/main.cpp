@@ -44,6 +44,10 @@ GLuint fullScreenShaderProgram;
 const int FRAME_BUFFER_WIDTH = 640;
 const int FRAME_BUFFER_HEIGHT = 480;
 
+//timing
+unsigned int lastTicks, currentTicks;
+float elapsedTime;
+float totalTime;
 
 void createFramebuffer()
 {
@@ -103,7 +107,7 @@ void createFramebuffer()
 	checkForCompilerErrors(vertexShaderProgram);
 
 	GLuint fragmentShaderProgram = 0;
-	string fsPath = ASSET_PATH + SHADER_PATH + "/simplePostProcessFS.glsl";
+	string fsPath = ASSET_PATH + SHADER_PATH + "/simplePostProcessAnimFS.glsl";
 	fragmentShaderProgram = loadShaderFromFile(fsPath, FRAGMENT_SHADER);
 	checkForCompilerErrors(fragmentShaderProgram);
 
@@ -123,6 +127,8 @@ void createFramebuffer()
 
 void initScene()
 {
+	currentTicks=SDL_GetTicks();
+	totalTime=0.0f;
 	createFramebuffer();
 	string modelPath = ASSET_PATH + MODEL_PATH + "/utah-teapot.fbx";
 	loadFBXFromFile(modelPath, &currentMesh);
@@ -204,10 +210,15 @@ void cleanUp()
 
 void update()
 {
+	lastTicks=currentTicks;
+	currentTicks=SDL_GetTicks();
+	elapsedTime = (currentTicks - lastTicks) / 1000.0f;
+	totalTime+=elapsedTime;
+
 	projMatrix = perspective(45.0f, 640.0f / 480.0f, 0.1f, 100.0f);
 
 	viewMatrix = lookAt(cameraPosition, vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
-	
+
 	MVPMatrix = projMatrix*viewMatrix*worldMatrix;
 }
 
@@ -269,7 +280,10 @@ void renderPostQuad()
 	glUseProgram(fullScreenShaderProgram);
 
 	GLint textureLocation = glGetUniformLocation(fullScreenShaderProgram, "texture0");
-	
+	GLint timeLocation=glGetUniformLocation(fullScreenShaderProgram,"time");
+
+	glUniform1f(timeLocation,totalTime);
+
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, FBOTexture);
 	glUniform1i(textureLocation, 0);
