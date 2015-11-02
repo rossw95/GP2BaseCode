@@ -49,6 +49,8 @@ unsigned int lastTicks, currentTicks;
 float elapsedTime;
 float totalTime;
 
+vec2 screenResolution=vec2(FRAME_BUFFER_WIDTH,FRAME_BUFFER_HEIGHT);
+
 void createFramebuffer()
 {
 	glActiveTexture(GL_TEXTURE0);
@@ -107,7 +109,7 @@ void createFramebuffer()
 	checkForCompilerErrors(vertexShaderProgram);
 
 	GLuint fragmentShaderProgram = 0;
-	string fsPath = ASSET_PATH + SHADER_PATH + "/simplePostProcessAnimFS.glsl";
+	string fsPath = ASSET_PATH + SHADER_PATH + "/simplePostProcessRippleFS.glsl";
 	fragmentShaderProgram = loadShaderFromFile(fsPath, FRAGMENT_SHADER);
 	checkForCompilerErrors(fragmentShaderProgram);
 
@@ -281,8 +283,10 @@ void renderPostQuad()
 
 	GLint textureLocation = glGetUniformLocation(fullScreenShaderProgram, "texture0");
 	GLint timeLocation=glGetUniformLocation(fullScreenShaderProgram,"time");
+	GLint resolutionLocation=glGetUniformLocation(fullScreenShaderProgram,"resolution");
 
 	glUniform1f(timeLocation,totalTime);
+	glUniform2fv(resolutionLocation,1,value_ptr(screenResolution));
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, FBOTexture);
