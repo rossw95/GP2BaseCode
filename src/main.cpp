@@ -25,7 +25,7 @@ vec4 specularLightColour=vec4(1.0f,1.0f,1.0f,1.0f);
 float specularPower=25.0f;
 
 vec3 lightDirection=vec3(0.0f,0.0f,1.0f);
-vec3 cameraPosition=vec3(0.0f,10.0f,50.0f);
+vec3 cameraPosition=vec3(0.0f,0.0f,20.0f);
 
 //for Framebuffer
 GLuint FBOTexture;
@@ -124,16 +124,16 @@ void initScene()
 {
 	currentTicks=SDL_GetTicks();
 	totalTime=0.0f;
-	createFramebuffer();
-	string modelPath = ASSET_PATH + MODEL_PATH + "/utah-teapot.fbx";
+	//createFramebuffer();
+	string modelPath = ASSET_PATH + MODEL_PATH + "/armoredrecon.fbx";
 	auto currentGameObject = loadFBXFromFile(modelPath);
 
 	string vsPath = ASSET_PATH + SHADER_PATH + "/specularVS.glsl";
 	string fsPath = ASSET_PATH + SHADER_PATH + "/specularFS.glsl";
 	currentGameObject->loadShader(vsPath, fsPath);
-	currentGameObject->setScale(vec3(0.3f, 0.3f, 0.3f));
 
 	gameObjects.push_back(currentGameObject);
+	currentGameObject->setPosition(vec3(0.0f, -10.0f, 0.0f));
 
 	modelPath = ASSET_PATH + MODEL_PATH + "/armoredrecon.fbx";
 	currentGameObject = loadFBXFromFile(modelPath);
@@ -232,8 +232,8 @@ void renderGameObject(shared_ptr<GameObject> gameObject)
 
 
 	glBindVertexArray(gameObject->getVertexArrayObject());
-
-	glDrawElements(GL_TRIANGLES, gameObject->getNumberOfIndices(), GL_UNSIGNED_INT, 0); 
+	if (gameObject->getVertexArrayObject()>0)
+		glDrawElements(GL_TRIANGLES, gameObject->getNumberOfIndices(), GL_UNSIGNED_INT, 0); 
 
 	for (int i = 0; i < gameObject->getNumberOfChildren(); i++)
 	{
@@ -243,7 +243,7 @@ void renderGameObject(shared_ptr<GameObject> gameObject)
 
 void renderScene()
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, frameBufferObject);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	//Set the clear colour(background)
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	//clear the colour and depth buffer
@@ -285,7 +285,7 @@ void renderPostQuad()
 void render()
 {
 	renderScene();
-	renderPostQuad();
+	//renderPostQuad();
 }
 
 int main(int argc, char * arg[])
