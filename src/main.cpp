@@ -16,6 +16,8 @@ mat4 MVPMatrix;
 
 vector<shared_ptr<GameObject> > gameObjects;
 GLuint currentShaderProgam = 0;
+GLuint currentDiffuseMap = 0;
+
 
 vec4 ambientLightColour=vec4(1.0f,1.0f,1.0f,1.0f);
 vec4 diffuseLightColour=vec4(1.0f,1.0f,1.0f,1.0f);
@@ -135,7 +137,13 @@ void initScene()
 
 	modelPath = ASSET_PATH + MODEL_PATH + "/armoredrecon.fbx";
 	currentGameObject = loadFBXFromFile(modelPath);
+	vsPath = ASSET_PATH + SHADER_PATH + "/textureVS.glsl";
+	fsPath = ASSET_PATH + SHADER_PATH + "/textureFS.glsl";
 	currentGameObject->loadShader(vsPath, fsPath);
+
+	string texturePath = ASSET_PATH + TEXTURE_PATH + "/armoredrecon_diff.png";
+	currentGameObject->loadDiffuseMap(texturePath);
+
 	gameObjects.push_back(currentGameObject);
 
 }
@@ -197,6 +205,15 @@ void renderGameObject(shared_ptr<GameObject> gameObject)
 	GLint cameraPositionLocation = glGetUniformLocation(currentShaderProgam, "cameraPosition");
 
 	GLint modelLocation = glGetUniformLocation(currentShaderProgam, "Model");
+
+	GLint texture0Location = glGetUniformLocation(currentShaderProgam, "texture0");
+
+	if (gameObject->getDiffuseMap() > 0){
+		currentDiffuseMap = gameObject->getDiffuseMap();
+	}
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, currentDiffuseMap);
+	glUniform1i(texture0Location, 0);
 
 	glUniformMatrix4fv(MVPLocation, 1, GL_FALSE, value_ptr(MVPMatrix));
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, value_ptr(gameObject->getModelMatrix()));
@@ -299,7 +316,7 @@ int main(int argc, char * arg[])
 	//Request opengl 4.1 context, Core Context
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
 
 	//Create a window
 	SDL_Window * window = SDL_CreateWindow(

@@ -16,6 +16,7 @@ public:
 
 	void createBuffers(Vertex * pVerts, int numVerts, int *pIndices, int numIndices);
 	void loadShader(const string& vsFilename, const string& fsFilename);
+	void loadDiffuseMap(const string& filename);
 
 	void setPosition(const vec3& position)
 	{
@@ -91,6 +92,11 @@ public:
 	{
 		return m_NoOfVertices;
 	};
+
+	GLuint getDiffuseMap()
+	{
+		return m_DiffuseMap;
+	};
 private:
 	GLuint m_VBO;
 	GLuint m_EBO;
@@ -108,6 +114,8 @@ private:
 	vec4 m_DiffuseMaterial;
 	vec4 m_SpecularMaterial;
 	float m_SpecularPower;
+
+	GLuint m_DiffuseMap;
 
 	vector<shared_ptr<GameObject> > m_ChildGameObjects;
 	GameObject * m_ParentGameObject;

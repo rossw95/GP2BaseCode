@@ -1,5 +1,6 @@
 #include "GameObject.h"
 #include "Shader.h"
+#include "Texture.h"
 
 GameObject::GameObject()
 {
@@ -24,6 +25,7 @@ GameObject::GameObject()
 	m_ChildGameObjects.clear();
 
 	m_ParentGameObject = NULL;
+	m_DiffuseMap = 0;
 }
 
 GameObject::~GameObject()
@@ -32,6 +34,7 @@ GameObject::~GameObject()
 	glDeleteBuffers(1, &m_EBO);
 	glDeleteVertexArrays(1, &m_VAO);
 	glDeleteProgram(m_ShaderProgram);
+	glDeleteTextures(1, &m_DiffuseMap);
 	m_ChildGameObjects.clear();
 }
 
@@ -124,5 +127,10 @@ void GameObject::loadShader(const string& vsFilename, const string& fsFilename)
 	//now we can delete the VS & FS Programs
 	glDeleteShader(vertexShaderProgram);
 	glDeleteShader(fragmentShaderProgram);
+}
+
+void GameObject::loadDiffuseMap(const string& filename)
+{
+	m_DiffuseMap = loadTextureFromFile(filename);
 }
 
