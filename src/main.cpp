@@ -6,29 +6,20 @@
 #include "Mesh.h"
 #include "FBXLoader.h"
 #include "FileSystem.h"
-
+#include "GameObject.h"
 
 //matrices
 mat4 viewMatrix;
 mat4 projMatrix;
-mat4 worldMatrix;
+
 mat4 MVPMatrix;
 
-GLuint VBO;
-GLuint EBO;
-GLuint VAO;
-GLuint shaderProgram;
+vector<shared_ptr<GameObject> > gameObjects;
+GLuint currentShaderProgam = 0;
 
-MeshData currentMesh;
-
-vec4 ambientMaterialColour=vec4(0.2f,0.2f,0.2f,1.0f);
 vec4 ambientLightColour=vec4(1.0f,1.0f,1.0f,1.0f);
-
 vec4 diffuseLightColour=vec4(1.0f,1.0f,1.0f,1.0f);
-vec4 diffuseMaterialColour=vec4(1.0f,0.0f,0.0f,1.0f);
-
 vec4 specularLightColour=vec4(1.0f,1.0f,1.0f,1.0f);
-vec4 specularMaterialColour=vec4(1.0f,1.0f,1.0f,1.0f);
 float specularPower=25.0f;
 
 vec3 lightDirection=vec3(0.0f,0.0f,1.0f);
@@ -109,7 +100,7 @@ void createFramebuffer()
 	checkForCompilerErrors(vertexShaderProgram);
 
 	GLuint fragmentShaderProgram = 0;
-	string fsPath = ASSET_PATH + SHADER_PATH + "/simplePostProcessRippleFS.glsl";
+	string fsPath = ASSET_PATH + SHADER_PATH + "/simplePostProcessFS.glsl";
 	fragmentShaderProgram = loadShaderFromFile(fsPath, FRAGMENT_SHADER);
 	checkForCompilerErrors(fragmentShaderProgram);
 
@@ -133,62 +124,20 @@ void initScene()
 	totalTime=0.0f;
 	createFramebuffer();
 	string modelPath = ASSET_PATH + MODEL_PATH + "/utah-teapot.fbx";
-	loadFBXFromFile(modelPath, &currentMesh);
-	//Generate Vertex Array
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	auto currentGameObject = loadFBXFromFile(modelPath);
 
-	glBufferData(GL_ARRAY_BUFFER, currentMesh.getNumVerts()*sizeof(Vertex), &currentMesh.vertices[0], GL_STATIC_DRAW);
-
-	//create buffer
-	glGenBuffers(1, &EBO);
-	//Make the EBO active
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	//Copy Index data to the EBO
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, currentMesh.getNumIndices()*sizeof(int), &currentMesh.indices[0], GL_STATIC_DRAW);
-
-	cout<<" Index Numbers "<<currentMesh.getNumIndices()<<" Vertex Numbers "<<currentMesh.getNumVerts()<<endl;
-
-	//Tell the shader that 0 is the position element
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), NULL);
-
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void**)(sizeof(vec3)));
-
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void**)(sizeof(vec3) + sizeof(vec4)));
-
-	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void**)(sizeof(vec3) + sizeof(vec4) + sizeof(vec2)));
-
-	GLuint vertexShaderProgram = 0;
 	string vsPath = ASSET_PATH + SHADER_PATH + "/specularVS.glsl";
-	vertexShaderProgram = loadShaderFromFile(vsPath, VERTEX_SHADER);
-	checkForCompilerErrors(vertexShaderProgram);
-
-	GLuint fragmentShaderProgram = 0;
 	string fsPath = ASSET_PATH + SHADER_PATH + "/specularFS.glsl";
-	fragmentShaderProgram = loadShaderFromFile(fsPath, FRAGMENT_SHADER);
-	checkForCompilerErrors(fragmentShaderProgram);
+	currentGameObject->loadShader(vsPath, fsPath);
+	currentGameObject->setScale(vec3(0.3f, 0.3f, 0.3f));
 
-	shaderProgram = glCreateProgram();
-	glAttachShader(shaderProgram, vertexShaderProgram);
-	glAttachShader(shaderProgram, fragmentShaderProgram);
+	gameObjects.push_back(currentGameObject);
 
-	//Link attributes
-	glBindAttribLocation(shaderProgram, 0, "vertexPosition");
-	glBindAttribLocation(shaderProgram, 1, "vertexColour");
-	glBindAttribLocation(shaderProgram, 2, "vertexTexCoords");
-	glBindAttribLocation(shaderProgram, 3, "vertexNormal");
+	modelPath = ASSET_PATH + MODEL_PATH + "/armoredrecon.fbx";
+	currentGameObject = loadFBXFromFile(modelPath);
+	currentGameObject->loadShader(vsPath, fsPath);
+	gameObjects.push_back(currentGameObject);
 
-	glLinkProgram(shaderProgram);
-	checkForLinkErrors(shaderProgram);
-	//now we can delete the VS & FS Programs
-	glDeleteShader(vertexShaderProgram);
-	glDeleteShader(fragmentShaderProgram);
 }
 
 void cleanUpFrambuffer()
@@ -204,10 +153,7 @@ void cleanUpFrambuffer()
 void cleanUp()
 {
 	cleanUpFrambuffer();
-	glDeleteProgram(shaderProgram);
-	glDeleteBuffers(1, &EBO);
-	glDeleteBuffers(1, &VBO);
-	glDeleteVertexArrays(1, &VAO);
+	gameObjects.clear();
 }
 
 void update()
@@ -221,7 +167,61 @@ void update()
 
 	viewMatrix = lookAt(cameraPosition, vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
 
-	MVPMatrix = projMatrix*viewMatrix*worldMatrix;
+	for (auto iter = gameObjects.begin(); iter != gameObjects.end(); iter++)
+	{
+		(*iter)->update();
+	}
+}
+
+void renderGameObject(shared_ptr<GameObject> gameObject)
+{
+	MVPMatrix = projMatrix*viewMatrix*gameObject->getModelMatrix();
+	
+	if (gameObject->getShaderProgram() > 0){
+		currentShaderProgam = gameObject->getShaderProgram();
+		glUseProgram(currentShaderProgam);
+	}
+
+	GLint MVPLocation = glGetUniformLocation(currentShaderProgam, "MVP");
+
+	GLint ambientLightColourLocation = glGetUniformLocation(currentShaderProgam, "ambientLightColour");
+	GLint ambientMaterialColourLocation = glGetUniformLocation(currentShaderProgam, "ambientMaterialColour");
+
+	GLint diffuseLightColourLocation = glGetUniformLocation(currentShaderProgam, "diffuseLightColour");
+	GLint diffuseLightMaterialLocation = glGetUniformLocation(currentShaderProgam, "diffuseMaterialColour");
+	GLint lightDirectionLocation = glGetUniformLocation(currentShaderProgam, "lightDirection");
+
+	GLint specularLightColourLocation = glGetUniformLocation(currentShaderProgam, "specularLightColour");
+	GLint specularLightMaterialLocation = glGetUniformLocation(currentShaderProgam, "specularMaterialColour");
+	GLint specularPowerLocation = glGetUniformLocation(currentShaderProgam, "specularPower");
+	GLint cameraPositionLocation = glGetUniformLocation(currentShaderProgam, "cameraPosition");
+
+	GLint modelLocation = glGetUniformLocation(currentShaderProgam, "Model");
+
+	glUniformMatrix4fv(MVPLocation, 1, GL_FALSE, value_ptr(MVPMatrix));
+	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, value_ptr(gameObject->getModelMatrix()));
+
+	glUniform4fv(ambientLightColourLocation, 1, value_ptr(ambientLightColour));
+	glUniform4fv(ambientMaterialColourLocation, 1, value_ptr(gameObject->getAmbientMaterial()));
+
+	glUniform4fv(diffuseLightColourLocation, 1, value_ptr(diffuseLightColour));
+	glUniform4fv(diffuseLightMaterialLocation, 1, value_ptr(gameObject->getDiffuseMaterial()));
+	glUniform3fv(lightDirectionLocation, 1, value_ptr(lightDirection));
+
+	glUniform4fv(specularLightColourLocation, 1, value_ptr(specularLightColour));
+	glUniform4fv(specularLightMaterialLocation, 1, value_ptr(gameObject->getSpecularMaterial()));
+	glUniform1f(specularPowerLocation, gameObject->getSpecularPower());
+	glUniform3fv(cameraPositionLocation, 1, value_ptr(cameraPosition));
+
+
+	glBindVertexArray(gameObject->getVertexArrayObject());
+
+	glDrawElements(GL_TRIANGLES, gameObject->getNumberOfIndices(), GL_UNSIGNED_INT, 0); 
+
+	for (int i = 0; i < gameObject->getNumberOfChildren(); i++)
+	{
+		renderGameObject(gameObject->getChild(i));
+	}
 }
 
 void renderScene()
@@ -232,43 +232,10 @@ void renderScene()
 	//clear the colour and depth buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glUseProgram(shaderProgram);
-
-	GLint MVPLocation = glGetUniformLocation(shaderProgram, "MVP");
-
-	glUniformMatrix4fv(MVPLocation, 1, GL_FALSE, value_ptr(MVPMatrix));
-
-	GLint ambientLightColourLocation = glGetUniformLocation(shaderProgram, "ambientLightColour");
-	GLint ambientMaterialColourLocation = glGetUniformLocation(shaderProgram, "ambientMaterialColour");
-
-	GLint diffuseLightColourLocation = glGetUniformLocation(shaderProgram, "diffuseLightColour");
-	GLint diffuseLightMaterialLocation = glGetUniformLocation(shaderProgram, "diffuseMaterialColour");
-	GLint lightDirectionLocation = glGetUniformLocation(shaderProgram, "lightDirection");
-
-	GLint specularLightColourLocation = glGetUniformLocation(shaderProgram, "specularLightColour");
-	GLint specularLightMaterialLocation = glGetUniformLocation(shaderProgram, "specularMaterialColour");
-	GLint specularPowerLocation = glGetUniformLocation(shaderProgram, "specularPower");
-	GLint cameraPositionLocation = glGetUniformLocation(shaderProgram, "cameraPosition");
-
-	GLint modelLocation = glGetUniformLocation(shaderProgram, "Model");
-	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, value_ptr(worldMatrix));
-
-	glUniform4fv(ambientLightColourLocation, 1, value_ptr(ambientLightColour));
-	glUniform4fv(ambientMaterialColourLocation, 1, value_ptr(ambientMaterialColour));
-
-	glUniform4fv(diffuseLightColourLocation, 1, value_ptr(diffuseLightColour));
-	glUniform4fv(diffuseLightMaterialLocation, 1, value_ptr(diffuseMaterialColour));
-	glUniform3fv(lightDirectionLocation, 1, value_ptr(lightDirection));
-
-	glUniform4fv(specularLightColourLocation, 1, value_ptr(specularLightColour));
-	glUniform4fv(specularLightMaterialLocation, 1, value_ptr(specularMaterialColour));
-	glUniform1f(specularPowerLocation, specularPower);
-	glUniform3fv(cameraPositionLocation, 1, value_ptr(cameraPosition));
-
-
-	glBindVertexArray(VAO);
-
-	glDrawElements(GL_TRIANGLES, currentMesh.getNumIndices(), GL_UNSIGNED_INT, 0);
+	for (auto iter = gameObjects.begin(); iter != gameObjects.end(); iter++)
+	{
+		renderGameObject((*iter));
+	}
 }
 
 void renderPostQuad()
