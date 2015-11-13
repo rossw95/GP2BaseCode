@@ -63,7 +63,7 @@ shared_ptr<GameObject> loadFBXFromFile(const string& filename)
 
 	FbxGeometryConverter lGeomConverter(lSdkManager);
 	lGeomConverter.Triangulate(lScene, /*replace*/true);
-	
+
 	// Print the nodes of the scene and their attributes recursively.
 	// Note that we are not printing the root node because it should
 	// not contain any attributes.
@@ -83,7 +83,7 @@ shared_ptr<GameObject> loadFBXFromFile(const string& filename)
 void processNode(FbxNode *node, shared_ptr<GameObject> parent)
 {
 	shared_ptr<GameObject> currentGameObject = shared_ptr<GameObject>(new GameObject);
-	parent->addChild(currentGameObject);
+	//parent->addChild(currentGameObject);
 	PrintTabs();
 	const char* nodeName = node->GetName();
 	FbxDouble3 translation = node->LclTranslation.Get();

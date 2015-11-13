@@ -7,6 +7,7 @@
 #include "FBXLoader.h"
 #include "FileSystem.h"
 #include "GameObject.h"
+#include "Cube.h"
 
 //matrices
 mat4 viewMatrix;
@@ -14,8 +15,7 @@ mat4 projMatrix;
 
 mat4 MVPMatrix;
 
-vector<shared_ptr<GameObject> > gameObjects;
-GLuint currentShaderProgam = 0;
+shared_ptr<GameObject> gameObject;
 
 vec4 ambientLightColour=vec4(1.0f,1.0f,1.0f,1.0f);
 vec4 diffuseLightColour=vec4(1.0f,1.0f,1.0f,1.0f);
@@ -23,7 +23,7 @@ vec4 specularLightColour=vec4(1.0f,1.0f,1.0f,1.0f);
 float specularPower=25.0f;
 
 vec3 lightDirection=vec3(0.0f,0.0f,1.0f);
-vec3 cameraPosition=vec3(0.0f,10.0f,50.0f);
+vec3 cameraPosition=vec3(0.0f,0.0f,10.0f);
 
 //for Framebuffer
 GLuint FBOTexture;
@@ -122,21 +122,15 @@ void initScene()
 {
 	currentTicks=SDL_GetTicks();
 	totalTime=0.0f;
+
+	gameObject=shared_ptr<GameObject>(new GameObject);
+
+	gameObject->createBuffers(cubeVerts,8,cubeIndices,36);
+	string vsPath = ASSET_PATH + SHADER_PATH + "/simpleVS.glsl";
+	string fsPath = ASSET_PATH + SHADER_PATH + "/simpleFS.glsl";
+	gameObject->loadShader(vsPath, fsPath);
+
 	createFramebuffer();
-	string modelPath = ASSET_PATH + MODEL_PATH + "/utah-teapot.fbx";
-	auto currentGameObject = loadFBXFromFile(modelPath);
-
-	string vsPath = ASSET_PATH + SHADER_PATH + "/specularVS.glsl";
-	string fsPath = ASSET_PATH + SHADER_PATH + "/specularFS.glsl";
-	currentGameObject->loadShader(vsPath, fsPath);
-	currentGameObject->setScale(vec3(0.3f, 0.3f, 0.3f));
-
-	gameObjects.push_back(currentGameObject);
-
-	modelPath = ASSET_PATH + MODEL_PATH + "/armoredrecon.fbx";
-	currentGameObject = loadFBXFromFile(modelPath);
-	currentGameObject->loadShader(vsPath, fsPath);
-	gameObjects.push_back(currentGameObject);
 
 }
 
@@ -153,7 +147,6 @@ void cleanUpFrambuffer()
 void cleanUp()
 {
 	cleanUpFrambuffer();
-	gameObjects.clear();
 }
 
 void update()
@@ -167,20 +160,21 @@ void update()
 
 	viewMatrix = lookAt(cameraPosition, vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
 
-	for (auto iter = gameObjects.begin(); iter != gameObjects.end(); iter++)
-	{
-		(*iter)->update();
-	}
+	gameObject->update();
 }
 
-void renderGameObject(shared_ptr<GameObject> gameObject)
+
+void renderScene()
 {
+	glBindFramebuffer(GL_FRAMEBUFFER, frameBufferObject);
+	//Set the clear colour(background)
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	//clear the colour and depth buffer
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	MVPMatrix = projMatrix*viewMatrix*gameObject->getModelMatrix();
-	
-	if (gameObject->getShaderProgram() > 0){
-		currentShaderProgam = gameObject->getShaderProgram();
-		glUseProgram(currentShaderProgam);
-	}
+
+	GLuint currentShaderProgam = gameObject->getShaderProgram();
+	glUseProgram(currentShaderProgam);
 
 	GLint MVPLocation = glGetUniformLocation(currentShaderProgam, "MVP");
 
@@ -216,26 +210,7 @@ void renderGameObject(shared_ptr<GameObject> gameObject)
 
 	glBindVertexArray(gameObject->getVertexArrayObject());
 
-	glDrawElements(GL_TRIANGLES, gameObject->getNumberOfIndices(), GL_UNSIGNED_INT, 0); 
-
-	for (int i = 0; i < gameObject->getNumberOfChildren(); i++)
-	{
-		renderGameObject(gameObject->getChild(i));
-	}
-}
-
-void renderScene()
-{
-	glBindFramebuffer(GL_FRAMEBUFFER, frameBufferObject);
-	//Set the clear colour(background)
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	//clear the colour and depth buffer
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	for (auto iter = gameObjects.begin(); iter != gameObjects.end(); iter++)
-	{
-		renderGameObject((*iter));
-	}
+	glDrawElements(GL_TRIANGLES, gameObject->getNumberOfIndices(), GL_UNSIGNED_INT, 0);
 }
 
 void renderPostQuad()

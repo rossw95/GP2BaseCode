@@ -12,8 +12,6 @@ public:
 
 	void update();
 
-	void addChild(shared_ptr<GameObject> child);
-
 	void createBuffers(Vertex * pVerts, int numVerts, int *pIndices, int numIndices);
 	void loadShader(const string& vsFilename, const string& fsFilename);
 
@@ -30,21 +28,6 @@ public:
 	void setScale(const vec3& scale)
 	{
 		m_Scale = scale;
-	};
-
-	int getNumberOfChildren()
-	{
-		return m_ChildGameObjects.size();
-	};
-
-	GameObject * getParent()
-	{
-		return m_ParentGameObject;
-	};
-
-	shared_ptr<GameObject> getChild(int i)
-	{
-		return m_ChildGameObjects.at(i); 
 	};
 
 	GLuint getVertexArrayObject()
@@ -98,19 +81,16 @@ private:
 	GLuint m_ShaderProgram;
 	int m_NoOfIndices;
 	int m_NoOfVertices;
-	
+
 	mat4 m_ModelMatrix;
 	vec3 m_Position;
 	vec3 m_Rotation;
 	vec3 m_Scale;
 
-	vec4 m_AmbientMaterial; 
+	vec4 m_AmbientMaterial;
 	vec4 m_DiffuseMaterial;
 	vec4 m_SpecularMaterial;
 	float m_SpecularPower;
-
-	vector<shared_ptr<GameObject> > m_ChildGameObjects;
-	GameObject * m_ParentGameObject;
 };
 
 #endif
