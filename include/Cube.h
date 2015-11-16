@@ -60,4 +60,7 @@ int cubeIndices[] = {
 	4, 7, 6
 };
 
+const int numberOfCubeIndices = 36;
+const int numberOfCubeVerts = 8;
+
 #endif
