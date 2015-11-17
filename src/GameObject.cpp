@@ -80,12 +80,10 @@ void GameObject::createBuffers(Vertex * pVerts, int numVerts, int *pIndices, int
 
 void GameObject::loadShader(const string& vsFilename, const string& fsFilename)
 {
-	GLuint vertexShaderProgram = 0;
-	vertexShaderProgram = loadShaderFromFile(vsFilename, VERTEX_SHADER);
+	GLuint vertexShaderProgram = loadShaderFromFile(vsFilename, VERTEX_SHADER);
 	checkForCompilerErrors(vertexShaderProgram);
 
-	GLuint fragmentShaderProgram = 0;
-	fragmentShaderProgram = loadShaderFromFile(fsFilename, FRAGMENT_SHADER);
+	GLuint fragmentShaderProgram = loadShaderFromFile(fsFilename, FRAGMENT_SHADER);
 	checkForCompilerErrors(fragmentShaderProgram);
 
 	m_ShaderProgram = glCreateProgram();
