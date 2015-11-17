@@ -9,6 +9,8 @@ GameObject::GameObject()
 	m_NoOfIndices=0;
 	m_NoOfVertices=0;
 
+	
+
 	m_ShaderProgram=0;
 
 	m_ModelMatrix=mat4(1.0f);
@@ -20,7 +22,12 @@ GameObject::GameObject()
 	m_DiffuseMaterial=vec4(0.8f,0.8f,0.8f,1.0f);
 	m_SpecularMaterial=vec4(1.0f,1.0f,1.0f,1.0f);
 	m_SpecularPower=25.0f;
+	parentGameObject = NULL;
+	ChildObjects.clear();
 }
+
+
+
 
 GameObject::~GameObject()
 {
@@ -33,6 +40,7 @@ GameObject::~GameObject()
 
 void GameObject::update()
 {
+
 	mat4 translationMatrix = translate(mat4(1.0f), m_Position);
 	mat4 scaleMatrix = scale(mat4(1.0f), m_Scale);
 

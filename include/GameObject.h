@@ -10,6 +10,21 @@ public:
 	GameObject();
 	~GameObject();
 
+	 GameObject* getParentObject(){
+
+		 return parentGameObject;
+	}
+
+	int getNumberOfChildren(){
+
+		return ChildObjects.size();
+	 }
+
+	void addChild(shared_ptr<GameObject> gameObject){
+
+		ChildObjects.push_back(gameObject);
+	}
+
 	void update();
 
 	void createBuffers(Vertex * pVerts, int numVerts, int *pIndices, int numIndices);
@@ -91,6 +106,8 @@ private:
 	vec4 m_DiffuseMaterial;
 	vec4 m_SpecularMaterial;
 	float m_SpecularPower;
+	GameObject * parentGameObject;
+	vector<shared_ptr<GameObject> > ChildObjects;
 };
 
 #endif
