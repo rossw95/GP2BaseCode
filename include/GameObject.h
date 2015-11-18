@@ -4,6 +4,7 @@
 #include "Common.h"
 #include "Vertices.h"
 #include "Mesh.h"
+#include "Material.h"
 
 class GameObject
 {
@@ -56,7 +57,7 @@ public:
 
 	GLuint getShaderProgram()
 	{
-		return m_ShaderProgram;
+		return m_Material->getShaderProgram();
 	};
 
 	mat4& getModelMatrix()
@@ -66,22 +67,22 @@ public:
 
 	vec4& getAmbientMaterial()
 	{
-		return m_AmbientMaterial;
+		return m_Material->getAmbientMaterial();
 	};
 
 	vec4& getDiffuseMaterial()
 	{
-		return m_DiffuseMaterial;
+		return m_Material->getDiffuseMaterial();
 	};
 
 	vec4& getSpecularMaterial()
 	{
-		return m_SpecularMaterial;
+		return m_Material->getSpecularMaterial();
 	};
 
 	float getSpecularPower()
 	{
-		return m_SpecularPower;
+		return m_Material->getSpecularPower();
 	};
 
 	int getNumberOfIndices()
@@ -96,24 +97,17 @@ public:
 
 	GLuint getDiffuseMap()
 	{
-		return m_DiffuseMap;
+		return m_Material->getDiffuseMap();
 	};
 private:
-	GLuint m_ShaderProgram;
 
 	shared_ptr<Mesh> m_Mesh;
+	shared_ptr<Material> m_Material;
 
 	mat4 m_ModelMatrix;
 	vec3 m_Position;
 	vec3 m_Rotation;
 	vec3 m_Scale;
-
-	vec4 m_AmbientMaterial;
-	vec4 m_DiffuseMaterial;
-	vec4 m_SpecularMaterial;
-	float m_SpecularPower;
-
-	GLuint m_DiffuseMap;
 
 	vector<shared_ptr<GameObject> > m_ChildGameObjects;
 	GameObject * m_ParentGameObject;
