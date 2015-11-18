@@ -41,6 +41,9 @@ const int FRAME_BUFFER_HEIGHT = 480;
 unsigned int lastTicks, currentTicks;
 float elapsedTime;
 float totalTime;
+int frameCounter=0;
+float FPS;
+float frameTime;
 
 vec2 screenResolution=vec2(FRAME_BUFFER_WIDTH,FRAME_BUFFER_HEIGHT);
 
@@ -166,10 +169,19 @@ void cleanUp()
 
 void update()
 {
+	frameCounter++;
 	lastTicks=currentTicks;
 	currentTicks=SDL_GetTicks();
 	elapsedTime = (currentTicks - lastTicks) / 1000.0f;
 	totalTime+=elapsedTime;
+	frameTime+=elapsedTime;
+	if (frameTime>1.0f)
+	{
+		FPS=frameCounter;
+		frameTime=0.0f;
+		frameCounter=0;
+		cout<<"FPS "<<FPS<<endl;
+	}
 
 	projMatrix = perspective(45.0f, 640.0f / 480.0f, 0.1f, 100.0f);
 

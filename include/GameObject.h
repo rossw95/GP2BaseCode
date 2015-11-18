@@ -3,6 +3,7 @@
 
 #include "Common.h"
 #include "Vertices.h"
+#include "Mesh.h"
 
 class GameObject
 {
@@ -45,12 +46,12 @@ public:
 
 	shared_ptr<GameObject> getChild(int i)
 	{
-		return m_ChildGameObjects.at(i); 
+		return m_ChildGameObjects.at(i);
 	};
 
 	GLuint getVertexArrayObject()
 	{
-		return m_VAO;
+		return m_Mesh->getVertexArrayObject();
 	};
 
 	GLuint getShaderProgram()
@@ -85,12 +86,12 @@ public:
 
 	int getNumberOfIndices()
 	{
-		return m_NoOfIndices;
+		return m_Mesh->getNumberOfIndices();
 	};
 
-	int getNumberOfVetices()
+	int getNumberOfVertices()
 	{
-		return m_NoOfVertices;
+		return m_Mesh->getNumberOfVertices();
 	};
 
 	GLuint getDiffuseMap()
@@ -98,19 +99,16 @@ public:
 		return m_DiffuseMap;
 	};
 private:
-	GLuint m_VBO;
-	GLuint m_EBO;
-	GLuint m_VAO;
 	GLuint m_ShaderProgram;
-	int m_NoOfIndices;
-	int m_NoOfVertices;
-	
+
+	shared_ptr<Mesh> m_Mesh;
+
 	mat4 m_ModelMatrix;
 	vec3 m_Position;
 	vec3 m_Rotation;
 	vec3 m_Scale;
 
-	vec4 m_AmbientMaterial; 
+	vec4 m_AmbientMaterial;
 	vec4 m_DiffuseMaterial;
 	vec4 m_SpecularMaterial;
 	float m_SpecularPower;
