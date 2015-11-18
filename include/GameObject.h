@@ -99,6 +99,16 @@ public:
 	{
 		return m_Material->getDiffuseMap();
 	};
+
+	void setMesh(shared_ptr<Mesh> mesh)
+	{
+		m_Mesh=mesh;
+	};
+
+	void setMaterial(shared_ptr<Material> material)
+	{
+		m_Material=material;
+	};
 private:
 
 	shared_ptr<Mesh> m_Mesh;
