@@ -7,6 +7,7 @@
 #include "FBXLoader.h"
 #include "FileSystem.h"
 #include "GameObject.h"
+#include "Sample.h"
 
 //matrices
 mat4 viewMatrix;
@@ -25,7 +26,7 @@ vec4 specularLightColour=vec4(1.0f,1.0f,1.0f,1.0f);
 float specularPower=25.0f;
 
 vec3 lightDirection=vec3(0.0f,0.0f,1.0f);
-vec3 cameraPosition=vec3(0.0f,0.0f,20.0f);
+vec3 cameraPosition=vec3(10.0f,10.0f,60.0f);
 
 //for Framebuffer
 GLuint FBOTexture;
@@ -127,28 +128,7 @@ void initScene()
 {
 	currentTicks=SDL_GetTicks();
 	totalTime=0.0f;
-	//createFramebuffer();
-	string modelPath = ASSET_PATH + MODEL_PATH + "/armoredrecon.fbx";
-	auto currentGameObject = loadFBXFromFile(modelPath);
-
-	string vsPath = ASSET_PATH + SHADER_PATH + "/specularVS.glsl";
-	string fsPath = ASSET_PATH + SHADER_PATH + "/specularFS.glsl";
-	currentGameObject->loadShader(vsPath, fsPath);
-
-	gameObjects.push_back(currentGameObject);
-	currentGameObject->setPosition(vec3(0.0f, -10.0f, 0.0f));
-
-	modelPath = ASSET_PATH + MODEL_PATH + "/armoredrecon.fbx";
-	currentGameObject = loadFBXFromFile(modelPath);
-	vsPath = ASSET_PATH + SHADER_PATH + "/textureVS.glsl";
-	fsPath = ASSET_PATH + SHADER_PATH + "/textureFS.glsl";
-	currentGameObject->loadShader(vsPath, fsPath);
-
-	string texturePath = ASSET_PATH + TEXTURE_PATH + "/armoredrecon_diff.png";
-	currentGameObject->loadDiffuseMap(texturePath);
-
-	gameObjects.push_back(currentGameObject);
-
+	initSample(gameObjects,10,10,10,1.1, vec3(0.0f,0.0f,0.0f));
 }
 
 void cleanUpFrambuffer()
