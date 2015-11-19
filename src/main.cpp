@@ -16,6 +16,8 @@ mat4 projMatrix;
 mat4 MVPMatrix;
 
 vector<shared_ptr<GameObject> > gameObjects;
+vector<shared_ptr<GameObject> > renderQueue;
+
 GLuint currentShaderProgam = 0;
 GLuint currentDiffuseMap = 0;
 
@@ -171,6 +173,10 @@ void update()
 	{
 		(*iter)->update();
 	}
+
+	renderQueue=gameObjects;
+	//updateRenderQueue(gameObjects,renderQueue,cameraPosition);
+
 }
 
 void renderGameObject(shared_ptr<GameObject> gameObject)
@@ -224,8 +230,10 @@ void renderGameObject(shared_ptr<GameObject> gameObject)
 
 
 	glBindVertexArray(gameObject->getVertexArrayObject());
-	if (gameObject->getVertexArrayObject()>0)
-		glDrawElements(GL_TRIANGLES, gameObject->getNumberOfIndices(), GL_UNSIGNED_INT, 0);
+	//if (gameObject->getVertexArrayObject()>0){
+	//	glMultiDrawElements(GL_TRIANGLES,)
+		//glDrawElements(GL_TRIANGLES, gameObject->getNumberOfIndices(), GL_UNSIGNED_INT, 0);
+	//}
 
 	for (int i = 0; i < gameObject->getNumberOfChildren(); i++)
 	{
@@ -241,10 +249,12 @@ void renderScene()
 	//clear the colour and depth buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	for (auto iter = gameObjects.begin(); iter != gameObjects.end(); iter++)
+	for (auto iter = renderQueue.begin(); iter != renderQueue.end(); iter++)
 	{
 		renderGameObject((*iter));
 	}
+
+	renderQueue.clear();
 }
 
 void renderPostQuad()

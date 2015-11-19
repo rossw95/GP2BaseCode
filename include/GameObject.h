@@ -5,6 +5,7 @@
 #include "Vertices.h"
 #include "Mesh.h"
 #include "Material.h"
+#include "BoundingBox.h"
 
 class GameObject
 {
@@ -114,6 +115,16 @@ public:
 	{
 		return (m_Material < obj.m_Material);
 	};
+
+	vec3& getPosition()
+	{
+		return m_Position;
+	};
+
+	BoundingBox& getBounds()
+	{
+		return m_Bounds;
+	};
 private:
 
 	shared_ptr<Mesh> m_Mesh;
@@ -126,6 +137,8 @@ private:
 
 	vector<shared_ptr<GameObject> > m_ChildGameObjects;
 	GameObject * m_ParentGameObject;
+
+	BoundingBox m_Bounds;
 };
 
 #endif

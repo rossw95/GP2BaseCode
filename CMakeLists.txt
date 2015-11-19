@@ -15,9 +15,10 @@ find_package(GLEW REQUIRED)
 find_package(GLM REQUIRED)
 find_package(FBX REQUIRED)
 
-add_executable(GP2BaseCode src/main.cpp src/Graphics.cpp src/Shader.cpp src/Texture.cpp src/FBXLoader.cpp src/FileSystem.cpp src/GameObject.cpp src/Mesh.cpp src/Material.cpp src/Sample.cpp
+add_executable(GP2BaseCode src/main.cpp src/Graphics.cpp src/Shader.cpp src/Texture.cpp src/FBXLoader.cpp src/FileSystem.cpp src/GameObject.cpp src/Mesh.cpp src/Material.cpp
+  src/Sample.cpp src/BoundingBox.cpp
 include/Common.h include/FBXLoader.h include/Graphics.h include/Shader.h include/Vertices.h include/Texture.h include/Mesh.h include/FileSystem.h include/GameObject.h
-include/Cube.h include/Mesh.h include/Material.h include/Sample.h)
+include/Cube.h include/Mesh.h include/Material.h include/Sample.h include/BoundingBox.h)
 
 include_directories(GP2BaseCode include/ ${OPENGL_INCLUDE_DIRS} ${SDL2_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${SDL2IMAGE_INCLUDE_DIR} ${SDL2_TTF_INCLUDE_DIR} ${FBX_INCLUDE_DIR})
 # create the program
