@@ -26,7 +26,6 @@ public:
 	{
 		return m_NoOfVertices;
 	};
-
 private:
 	GLuint m_VBO;
 	GLuint m_EBO;
@@ -34,6 +33,11 @@ private:
 
 	int m_NoOfIndices;
 	int m_NoOfVertices;
+
+	int m_IndicesIndexStart;
+	int m_VertexIndexStart;
+	int m_IndicesIndexEnd;
+	int m_VertexIndexEnd;
 };
 
 #endif

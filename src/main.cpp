@@ -48,84 +48,6 @@ int frameCounter=0;
 float FPS;
 float frameTime;
 
-vec2 screenResolution=vec2(FRAME_BUFFER_WIDTH,FRAME_BUFFER_HEIGHT);
-
-void createFramebuffer()
-{
-	glActiveTexture(GL_TEXTURE0);
-	glGenTextures(1, &FBOTexture);
-	glBindTexture(GL_TEXTURE_2D, FBOTexture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0, GL_RGBA,
-		GL_UNSIGNED_BYTE, NULL);
-
-
-	glGenRenderbuffers(1, &FBODepthBuffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, FBODepthBuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-	glGenFramebuffers(1, &frameBufferObject);
-	glBindFramebuffer(GL_FRAMEBUFFER, frameBufferObject);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D, FBOTexture, 0);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,GL_RENDERBUFFER, FBODepthBuffer);
-
-	GLenum status;
-	if ((status = glCheckFramebufferStatus(GL_FRAMEBUFFER)) != GL_FRAMEBUFFER_COMPLETE) {
-		cout << "Issue with Framebuffers" << endl;
-	}
-	float vertices[] = {
-		-1, -1,
-		1, -1,
-		-1, 1,
-		1, 1,
-
-	};
-
-	glGenVertexArrays(1, &fullScreenVAO);
-	glBindVertexArray(fullScreenVAO);
-
-	glGenBuffers(1, &fullScreenVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, fullScreenVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(
-		0,  // attribute
-		2,                  // number of elements per vertex, here (x,y)
-		GL_FLOAT,           // the type of each element
-		GL_FALSE,           // take our values as-is
-		0,                  // no extra data between each position
-		0                   // offset of first element
-		);
-
-	GLuint vertexShaderProgram = 0;
-	string vsPath = ASSET_PATH + SHADER_PATH + "/simplePostProcessVS.glsl";
-	vertexShaderProgram = loadShaderFromFile(vsPath, VERTEX_SHADER);
-	checkForCompilerErrors(vertexShaderProgram);
-
-	GLuint fragmentShaderProgram = 0;
-	string fsPath = ASSET_PATH + SHADER_PATH + "/simplePostProcessFS.glsl";
-	fragmentShaderProgram = loadShaderFromFile(fsPath, FRAGMENT_SHADER);
-	checkForCompilerErrors(fragmentShaderProgram);
-
-	fullScreenShaderProgram = glCreateProgram();
-	glAttachShader(fullScreenShaderProgram, vertexShaderProgram);
-	glAttachShader(fullScreenShaderProgram, fragmentShaderProgram);
-
-	//Link attributes
-	glBindAttribLocation(fullScreenShaderProgram, 0, "vertexPosition");
-
-	glLinkProgram(fullScreenShaderProgram);
-	checkForLinkErrors(fullScreenShaderProgram);
-	//now we can delete the VS & FS Programs
-	glDeleteShader(vertexShaderProgram);
-	glDeleteShader(fragmentShaderProgram);
-}
-
 void initScene()
 {
 	currentTicks=SDL_GetTicks();
@@ -133,19 +55,9 @@ void initScene()
 	initSample(gameObjects,20,20,20,1.1, vec3(0.0f,0.0f,0.0f));
 }
 
-void cleanUpFrambuffer()
-{
-	glDeleteProgram(fullScreenShaderProgram);
-	glDeleteBuffers(1, &fullScreenVBO);
-	glDeleteVertexArrays(1, &fullScreenVAO);
-	glDeleteFramebuffers(1, &frameBufferObject);
-	glDeleteRenderbuffers(1, &FBODepthBuffer);
-	glDeleteTextures(1, &FBOTexture);
-}
-
 void cleanUp()
 {
-	cleanUpFrambuffer();
+	cleanUpSample();
 	gameObjects.clear();
 }
 
@@ -179,68 +91,6 @@ void update()
 
 }
 
-void renderGameObject(shared_ptr<GameObject> gameObject)
-{
-	MVPMatrix = projMatrix*viewMatrix*gameObject->getModelMatrix();
-
-	if (gameObject->getShaderProgram() > 0){
-		currentShaderProgam = gameObject->getShaderProgram();
-		glUseProgram(currentShaderProgam);
-	}
-
-	GLint MVPLocation = glGetUniformLocation(currentShaderProgam, "MVP");
-
-	GLint ambientLightColourLocation = glGetUniformLocation(currentShaderProgam, "ambientLightColour");
-	GLint ambientMaterialColourLocation = glGetUniformLocation(currentShaderProgam, "ambientMaterialColour");
-
-	GLint diffuseLightColourLocation = glGetUniformLocation(currentShaderProgam, "diffuseLightColour");
-	GLint diffuseLightMaterialLocation = glGetUniformLocation(currentShaderProgam, "diffuseMaterialColour");
-	GLint lightDirectionLocation = glGetUniformLocation(currentShaderProgam, "lightDirection");
-
-	GLint specularLightColourLocation = glGetUniformLocation(currentShaderProgam, "specularLightColour");
-	GLint specularLightMaterialLocation = glGetUniformLocation(currentShaderProgam, "specularMaterialColour");
-	GLint specularPowerLocation = glGetUniformLocation(currentShaderProgam, "specularPower");
-	GLint cameraPositionLocation = glGetUniformLocation(currentShaderProgam, "cameraPosition");
-
-	GLint modelLocation = glGetUniformLocation(currentShaderProgam, "Model");
-
-	GLint texture0Location = glGetUniformLocation(currentShaderProgam, "texture0");
-
-	if (gameObject->getDiffuseMap() > 0){
-		currentDiffuseMap = gameObject->getDiffuseMap();
-	}
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, currentDiffuseMap);
-	glUniform1i(texture0Location, 0);
-
-	glUniformMatrix4fv(MVPLocation, 1, GL_FALSE, value_ptr(MVPMatrix));
-	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, value_ptr(gameObject->getModelMatrix()));
-
-	glUniform4fv(ambientLightColourLocation, 1, value_ptr(ambientLightColour));
-	glUniform4fv(ambientMaterialColourLocation, 1, value_ptr(gameObject->getAmbientMaterial()));
-
-	glUniform4fv(diffuseLightColourLocation, 1, value_ptr(diffuseLightColour));
-	glUniform4fv(diffuseLightMaterialLocation, 1, value_ptr(gameObject->getDiffuseMaterial()));
-	glUniform3fv(lightDirectionLocation, 1, value_ptr(lightDirection));
-
-	glUniform4fv(specularLightColourLocation, 1, value_ptr(specularLightColour));
-	glUniform4fv(specularLightMaterialLocation, 1, value_ptr(gameObject->getSpecularMaterial()));
-	glUniform1f(specularPowerLocation, gameObject->getSpecularPower());
-	glUniform3fv(cameraPositionLocation, 1, value_ptr(cameraPosition));
-
-
-	glBindVertexArray(gameObject->getVertexArrayObject());
-	//if (gameObject->getVertexArrayObject()>0){
-	//	glMultiDrawElements(GL_TRIANGLES,)
-		//glDrawElements(GL_TRIANGLES, gameObject->getNumberOfIndices(), GL_UNSIGNED_INT, 0);
-	//}
-
-	for (int i = 0; i < gameObject->getNumberOfChildren(); i++)
-	{
-		renderGameObject(gameObject->getChild(i));
-	}
-}
-
 void renderScene()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -249,39 +99,21 @@ void renderScene()
 	//clear the colour and depth buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	for (auto iter = renderQueue.begin(); iter != renderQueue.end(); iter++)
-	{
-		renderGameObject((*iter));
+	MVPMatrix = projMatrix*viewMatrix*mat4(1.0f);
+	if (gameObjects[0]->getShaderProgram() > 0){
+		currentShaderProgam = gameObjects[0]->getShaderProgram();
+		glUseProgram(currentShaderProgam);
 	}
+	GLint MVPLocation = glGetUniformLocation(currentShaderProgam, "MVP");
+	glUniformMatrix4fv(MVPLocation, 1, GL_FALSE, value_ptr(MVPMatrix));
+	glBindVertexArray(gameObjects[0]->getVertexArrayObject());
 
+	glBindBuffer(GL_ARRAY_BUFFER,instanceVBO);
+	glEnableVertexAttribArray(7);
+	glVertexAttribPointer(7, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), NULL);
+	glVertexAttribDivisor(7,1);
+	glDrawElementsInstanced(GL_TRIANGLES,36, GL_UNSIGNED_INT,0, 8000);
 	renderQueue.clear();
-}
-
-void renderPostQuad()
-{
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	//Set the clear colour(background)
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	//clear the colour and depth buffer
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	glUseProgram(fullScreenShaderProgram);
-
-	GLint textureLocation = glGetUniformLocation(fullScreenShaderProgram, "texture0");
-	GLint timeLocation=glGetUniformLocation(fullScreenShaderProgram,"time");
-	GLint resolutionLocation=glGetUniformLocation(fullScreenShaderProgram,"resolution");
-
-	glUniform1f(timeLocation,totalTime);
-	glUniform2fv(resolutionLocation,1,value_ptr(screenResolution));
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, FBOTexture);
-	glUniform1i(textureLocation, 0);
-
-	glBindVertexArray(fullScreenVAO);
-
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
 }
 
 void render()
