@@ -128,7 +128,7 @@ void initScene()
 {
 	currentTicks=SDL_GetTicks();
 	totalTime=0.0f;
-	initSample(gameObjects,10,10,10,1.1, vec3(0.0f,0.0f,0.0f));
+	initSample(gameObjects,20,20,20,1.1, vec3(0.0f,0.0f,0.0f));
 }
 
 void cleanUpFrambuffer()

@@ -27,6 +27,21 @@ public:
     return m_SpecularMaterial;
   };
 
+  void setAmbientMaterial(const vec4& colour)
+  {
+    m_AmbientMaterial=colour;
+  };
+
+  void setDiffuseMaterial(const vec4& colour)
+  {
+    m_DiffuseMaterial=colour;
+  };
+
+  void setSpecularMaterial(const vec4& colour)
+  {
+    m_SpecularMaterial=colour;
+  };
+
   float getSpecularPower()
   {
     return m_SpecularPower;
@@ -40,6 +55,11 @@ public:
   GLuint getDiffuseMap()
   {
     return m_DiffuseMap;
+  };
+
+  bool operator < (const Material& mat) const
+  {
+    return (m_ShaderProgram < mat.m_ShaderProgram);
   };
 private:
   GLuint m_ShaderProgram;

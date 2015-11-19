@@ -109,6 +109,11 @@ public:
 	{
 		m_Material=material;
 	};
+
+	bool operator < (const GameObject& obj) const
+	{
+		return (m_Material < obj.m_Material);
+	};
 private:
 
 	shared_ptr<Mesh> m_Mesh;
