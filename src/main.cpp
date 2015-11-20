@@ -16,6 +16,7 @@ mat4 projMatrix;
 mat4 MVPMatrix;
 
 shared_ptr<GameObject> gameObject;
+vector<shared_ptr<GameObject> > gameObjects;
 
 vec4 ambientLightColour=vec4(1.0f,1.0f,1.0f,1.0f);
 vec4 diffuseLightColour=vec4(1.0f,1.0f,1.0f,1.0f);
@@ -26,6 +27,7 @@ vec3 lightDirection=vec3(0.0f,0.0f,1.0f);
 vec3 cameraPosition=vec3(0.0f,0.0f,10.0f);
 
 //for Framebuffer
+GLuint currentShaderProgram = 0;
 GLuint FBOTexture;
 GLuint FBODepthBuffer;
 GLuint frameBufferObject;
@@ -41,6 +43,7 @@ float elapsedTime;
 float totalTime;
 
 vec2 screenResolution=vec2(FRAME_BUFFER_WIDTH,FRAME_BUFFER_HEIGHT);
+
 
 void createFramebuffer()
 {
@@ -120,17 +123,27 @@ void createFramebuffer()
 
 void initScene()
 {
-	currentTicks=SDL_GetTicks();
-	totalTime=0.0f;
-
-	gameObject=shared_ptr<GameObject>(new GameObject);
-
-	gameObject->createBuffers(cubeVerts, numberOfCubeVerts, cubeIndices, numberOfCubeIndices);
-	string vsPath = ASSET_PATH + SHADER_PATH + "/simpleVS.glsl";
-	string fsPath = ASSET_PATH + SHADER_PATH + "/simpleFS.glsl";
-	gameObject->loadShader(vsPath, fsPath);
-
+	currentTicks = SDL_GetTicks();
+ 	totalTime = 0.0f;
 	createFramebuffer();
+	string modelPath = ASSET_PATH + MODEL_PATH + "/utah-teapot.fbx";
+ 	auto currentGameObject = loadFBXFromFile(modelPath);
+ 	string vsPath = ASSET_PATH + SHADER_PATH + "/specularVS.glsl";
+	string fsPath = ASSET_PATH + SHADER_PATH + "/specularFS.glsl";
+	currentGameObject->loadShader(vsPath, fsPath);
+ 	currentGameObject->setScale(vec3(0.3f, 0.3f, 0.3f));
+
+
+	gameObjects.push_back(currentGameObject);
+	
+
+	modelPath = ASSET_PATH + MODEL_PATH + "/armoredrecon.fbx";
+	currentGameObject = loadFBXFromFile(modelPath);
+	currentGameObject->loadShader(vsPath, fsPath);
+	gameObjects.push_back(currentGameObject);
+
+
+
 
 }
 
@@ -163,6 +176,31 @@ void update()
 	gameObject->update();
 }
 
+void renderGameObject(shared_ptr<GameObject> currentGameObject){
+
+	MVPMatrix = projMatrix*viewMatrix*currentGameObject->getModelMatrix();
+
+	if (gameObject->getShaderProgram() > 0){
+
+		currentShaderProgram = currentGameObject->getShaderProgram();
+		glUseProgram(currentShaderProgram);
+	}
+
+	GLint MVPLocation = glGetUniformLocation(currentShaderProgram, "MVP");
+
+	glUniformMatrix4fv(MVPLocation, 1, GL_FALSE, value_ptr(MVPMatrix));
+	glBindVertexArray(currentGameObject->getVertexArrayObject());
+
+	glDrawElements(GL_TRIANGLES, gameObject->getNumberOfIndices(), GL_UNSIGNED_INT, 0);
+
+	for (int i = 0; i < currentGameObject->getNumberOfChildren(); i++){
+
+		renderGameObject(currentGameObject->getChild(i));
+
+	}
+
+
+}
 
 void renderScene()
 {
@@ -216,6 +254,7 @@ void render()
 {
 	renderScene();
 	renderPostQuad();
+	renderGameObject(gameObject);
 }
 
 int main(int argc, char * arg[])

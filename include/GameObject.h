@@ -19,7 +19,12 @@ public:
 
 		return ChildObjects.size();
 	 }
+	 
+	shared_ptr<GameObject> getChild(int child){
 
+		return ChildObjects.at(child);
+
+	}
 	void addChild(shared_ptr<GameObject> gameObject){
 
 		ChildObjects.push_back(gameObject);

@@ -1,6 +1,7 @@
 #include "GameObject.h"
 #include "Shader.h"
 
+
 GameObject::GameObject()
 {
 	m_VBO=0;
@@ -40,6 +41,13 @@ GameObject::~GameObject()
 
 void GameObject::update()
 {
+	mat4 parentModel(1.0f);
+
+	if (parentGameObject){
+
+		parentModel = parentGameObject->getModelMatrix();
+
+	}
 
 	mat4 translationMatrix = translate(mat4(1.0f), m_Position);
 	mat4 scaleMatrix = scale(mat4(1.0f), m_Scale);
@@ -48,8 +56,16 @@ void GameObject::update()
 		rotate(mat4(1.0f), m_Rotation.y, vec3(0.0f, 1.0f, 0.0f))*
 		rotate(mat4(1.0f), m_Rotation.z, vec3(0.0f, 0.0f, 1.0f));
 
-	m_ModelMatrix = scaleMatrix*rotationMatrix*translationMatrix;
+	m_ModelMatrix = scaleMatrix*rotationMatrix*translationMatrix*parentModel;
+
+	for (auto iter = ChildObjects.begin(); iter != ChildObjects.end(); iter++){
+
+		(*iter)->update();
+
+	}
+
 }
+
 
 void GameObject::createBuffers(Vertex * pVerts, int numVerts, int *pIndices, int numIndices)
 {

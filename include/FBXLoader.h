@@ -6,6 +6,7 @@
 #include "Vertices.h"
 #include "GameObject.h"
 #include <fbxsdk.h>
+#include <GameObject.h>
 
 shared_ptr<GameObject> loadFBXFromFile(const string& filename);
 
