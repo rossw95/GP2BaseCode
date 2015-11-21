@@ -66,8 +66,12 @@ int Renderer::addToBuffers(Vertex * pVerts, int numVerts, int *pIndices, int num
 
   return startIndex;
 }
+void Renderer::bindBuffer()
+{
+	glBindVertexArray(m_staticVAO);
+}
 
 void Renderer::render(int startIndex,int endIndex,int count)
 {
-  glDrawRangeElements(	GL_TRIANGLES,startIndex,endIndex,count,GL_UNSIGNED_INT,NULL);
+  glDrawRangeElements(GL_TRIANGLES,startIndex,endIndex,count,GL_UNSIGNED_INT,NULL);
 }

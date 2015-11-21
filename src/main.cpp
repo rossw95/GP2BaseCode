@@ -87,9 +87,68 @@ void update()
 	}
 
 	renderQueue=gameObjects;
-	//updateRenderQueue(gameObjects,renderQueue,cameraPosition);
-
 }
+
+void renderGameObject(shared_ptr<GameObject> gameObject)
+{
+	MVPMatrix = projMatrix*viewMatrix*gameObject->getModelMatrix();
+
+	if (gameObject->getShaderProgram() > 0){
+		currentShaderProgam = gameObject->getShaderProgram();
+		glUseProgram(currentShaderProgam);
+	}
+
+	GLint MVPLocation = glGetUniformLocation(currentShaderProgam, "MVP");
+
+	GLint ambientLightColourLocation = glGetUniformLocation(currentShaderProgam, "ambientLightColour");
+	GLint ambientMaterialColourLocation = glGetUniformLocation(currentShaderProgam, "ambientMaterialColour");
+
+	GLint diffuseLightColourLocation = glGetUniformLocation(currentShaderProgam, "diffuseLightColour");
+	GLint diffuseLightMaterialLocation = glGetUniformLocation(currentShaderProgam, "diffuseMaterialColour");
+	GLint lightDirectionLocation = glGetUniformLocation(currentShaderProgam, "lightDirection");
+
+	GLint specularLightColourLocation = glGetUniformLocation(currentShaderProgam, "specularLightColour");
+	GLint specularLightMaterialLocation = glGetUniformLocation(currentShaderProgam, "specularMaterialColour");
+	GLint specularPowerLocation = glGetUniformLocation(currentShaderProgam, "specularPower");
+	GLint cameraPositionLocation = glGetUniformLocation(currentShaderProgam, "cameraPosition");
+
+	GLint modelLocation = glGetUniformLocation(currentShaderProgam, "Model");
+
+	GLint texture0Location = glGetUniformLocation(currentShaderProgam, "texture0");
+
+	if (gameObject->getDiffuseMap() > 0){
+		currentDiffuseMap = gameObject->getDiffuseMap();
+	}
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, currentDiffuseMap);
+	glUniform1i(texture0Location, 0);
+
+	glUniformMatrix4fv(MVPLocation, 1, GL_FALSE, value_ptr(MVPMatrix));
+	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, value_ptr(gameObject->getModelMatrix()));
+
+	glUniform4fv(ambientLightColourLocation, 1, value_ptr(ambientLightColour));
+	glUniform4fv(ambientMaterialColourLocation, 1, value_ptr(gameObject->getAmbientMaterial()));
+
+	glUniform4fv(diffuseLightColourLocation, 1, value_ptr(diffuseLightColour));
+	glUniform4fv(diffuseLightMaterialLocation, 1, value_ptr(gameObject->getDiffuseMaterial()));
+	glUniform3fv(lightDirectionLocation, 1, value_ptr(lightDirection));
+
+	glUniform4fv(specularLightColourLocation, 1, value_ptr(specularLightColour));
+	glUniform4fv(specularLightMaterialLocation, 1, value_ptr(gameObject->getSpecularMaterial()));
+	glUniform1f(specularPowerLocation, gameObject->getSpecularPower());
+	glUniform3fv(cameraPositionLocation, 1, value_ptr(cameraPosition));
+
+
+	glBindVertexArray(gameObject->getVertexArrayObject());
+	if (gameObject->getVertexArrayObject()>0)
+		glDrawElements(GL_TRIANGLES, gameObject->getNumberOfIndices(), GL_UNSIGNED_INT, 0);
+
+	for (int i = 0; i < gameObject->getNumberOfChildren(); i++)
+	{
+		renderGameObject(gameObject->getChild(i));
+	}
+}
+
 
 void renderScene()
 {
@@ -99,20 +158,11 @@ void renderScene()
 	//clear the colour and depth buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	MVPMatrix = projMatrix*viewMatrix*mat4(1.0f);
-	if (gameObjects[0]->getShaderProgram() > 0){
-		currentShaderProgam = gameObjects[0]->getShaderProgram();
-		glUseProgram(currentShaderProgam);
+	for (auto iter = renderQueue.begin(); iter != renderQueue.end(); iter++)
+	{
+		renderGameObject((*iter));
 	}
-	GLint MVPLocation = glGetUniformLocation(currentShaderProgam, "MVP");
-	glUniformMatrix4fv(MVPLocation, 1, GL_FALSE, value_ptr(MVPMatrix));
-	glBindVertexArray(gameObjects[0]->getVertexArrayObject());
 
-	glBindBuffer(GL_ARRAY_BUFFER,instanceVBO);
-	glEnableVertexAttribArray(7);
-	glVertexAttribPointer(7, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), NULL);
-	glVertexAttribDivisor(7,1);
-	glDrawElementsInstanced(GL_TRIANGLES,36, GL_UNSIGNED_INT,0, 8000);
 	renderQueue.clear();
 }
 

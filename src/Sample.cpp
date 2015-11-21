@@ -19,20 +19,6 @@ string texturePath=ASSET_PATH+TEXTURE_PATH+"/texture.png";
 vector<shared_ptr<Material> > materialList;
 vector<shared_ptr<Instance> > instanceList;
 
-GLuint instanceVBO;
-
-void createBuffer(int size)
-{
-
-  glGenBuffers(1, &instanceVBO);
-  glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-  glBufferData(GL_ARRAY_BUFFER, size*sizeof(vec3), NULL, GL_STATIC_DRAW);
-
-  //Tell the shader that 0 is the position element
-  glEnableVertexAttribArray(7);
-  glVertexAttribPointer(7, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), NULL);
-}
-
 void sortGameObjects(vector<shared_ptr<GameObject> > &displayList)
 {
   std::sort(displayList.begin(), displayList.end());
@@ -72,8 +58,6 @@ void initSample(vector<shared_ptr<GameObject> > &displayList,int numX,int numY, 
   mesh->create(cubeVerts, numberOfCubeVerts, cubeIndices, numberOfCubeIndices);
   srand(time(NULL));
   createMaterials();
-  createBuffer(numX*numY*numZ);
-  vector<vec3> positions;
 
   vec3 currentPos=startPosition;
   for (int y=0;y<numY;y++)
@@ -88,11 +72,9 @@ void initSample(vector<shared_ptr<GameObject> > &displayList,int numX,int numY, 
         int materialID=rand()%materialList.size();
         cout<<"Material ID "<<materialID<<endl;
         gameObject->setMaterial(materialList[materialID]);
-
         gameObject->setPosition(currentPos);
 
         displayList.push_back(gameObject);
-        positions.push_back(currentPos);
         currentPos.z+=spacing;
       }
       currentPos.x+=spacing;
@@ -103,12 +85,11 @@ void initSample(vector<shared_ptr<GameObject> > &displayList,int numX,int numY, 
     currentPos.z=startPosition.z;
   }
   //sortGameObjects(displayList);
-  glBufferData(GL_ARRAY_BUFFER, (numX*numY*numZ)*sizeof(vec3), &positions[0], GL_STATIC_DRAW);
 }
 
 void cleanUpSample()
 {
-  glDeleteBuffers(1, &instanceVBO);
+
 }
 
 /*

@@ -3,6 +3,7 @@
 
 #include "Common.h"
 #include "Vertices.h"
+#include "BatchedMesh.h"
 
 const int MAX_VBO_SIZE=100000;
 const int MAX_EBO_SIZE=300000;
@@ -15,6 +16,8 @@ public:
   void createBuffers(int VBOSize,int EBOSize);
   int addToBuffers(Vertex * pVerts, int numVerts, int *pIndices, int numIndices);
   void render(int startIndex,int endIndex,int count);
+  void bindBuffer();
+  shared_ptr<BatchedMesh> createMesh(Vertex * pVerts, int numVerts, int *pIndices, int numIndices);
 private:
   GLuint m_staticVAO;
   GLuint m_staticVBO;
