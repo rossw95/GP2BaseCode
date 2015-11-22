@@ -7,7 +7,7 @@
 #include "FBXLoader.h"
 #include "FileSystem.h"
 #include "GameObject.h"
-#include "Sample.h"
+#include "Cube.h"
 
 //matrices
 mat4 viewMatrix;
@@ -17,6 +17,7 @@ mat4 MVPMatrix;
 
 vector<shared_ptr<GameObject> > gameObjects;
 vector<shared_ptr<GameObject> > renderQueue;
+shared_ptr<GameObject> skyBox;
 
 GLuint currentShaderProgam = 0;
 GLuint currentDiffuseMap = 0;
@@ -52,12 +53,31 @@ void initScene()
 {
 	currentTicks=SDL_GetTicks();
 	totalTime=0.0f;
-	initSample(gameObjects,20,20,20,1.1, vec3(0.0f,0.0f,0.0f));
+
+	shared_ptr<Mesh> cubeMesh=shared_ptr<Mesh>(new Mesh);
+	cubeMesh->create(cubeVerts,numberOfCubeVerts,cubeIndices,numberOfCubeIndices);
+
+	shared_ptr<Material> skyMaterial=shared_ptr<Material>(new Material);
+	string skyBoxFront=ASSET_PATH+TEXTURE_PATH+"/Skybox/Sunny_front.png";
+	string skyBoxBack=ASSET_PATH+TEXTURE_PATH+"/Skybox/Sunny_back.png";
+	string skyBoxLeft=ASSET_PATH+TEXTURE_PATH+"/Skybox/Sunny_left.png";
+	string skyBoxRight=ASSET_PATH+TEXTURE_PATH+"/Skybox/Sunny_right.png";
+	string skyBoxUp=ASSET_PATH+TEXTURE_PATH+"/Skybox/Sunny_up.png";
+	string skyBoxDown=ASSET_PATH+TEXTURE_PATH+"/Skybox/Sunny_down.png";
+	skyMaterial->loadSkyBoxTextures(skyBoxFront,skyBoxBack,skyBoxLeft,skyBoxRight,skyBoxUp,skyBoxDown);
+
+	string vsPath=ASSET_PATH+SHADER_PATH+"/skyVS.glsl";
+	string fsPath=ASSET_PATH+SHADER_PATH+"/skyFS.glsl";
+	skyMaterial->loadShader(vsPath,fsPath);
+	skyBox=shared_ptr<GameObject>(new GameObject);
+	skyBox->setMesh(cubeMesh);
+	skyBox->setMaterial(skyMaterial);
+
+	skyBox->update();
 }
 
 void cleanUp()
 {
-	cleanUpSample();
 	gameObjects.clear();
 }
 
@@ -111,9 +131,13 @@ void renderGameObject(shared_ptr<GameObject> gameObject)
 
 		mat->setUniform("Model", gameObject->getModelMatrix());
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, gameObject->getDiffuseMap());
+		glBindTexture(GL_TEXTURE_2D, mat->getDiffuseMap());
 
 		mat->setUniform("texture0", 0);
+
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, mat->getEnvironmentMap());
+		mat->setUniform("cubeTexture", 4);
 	}
 	glBindVertexArray(gameObject->getVertexArrayObject());
 
@@ -138,6 +162,8 @@ void renderScene()
 	{
 		renderGameObject((*iter));
 	}
+	//Turn off depth Buffering
+	renderGameObject(skyBox);
 
 	renderQueue.clear();
 }
@@ -176,7 +202,7 @@ int main(int argc, char * arg[])
 	//Request opengl 4.1 context, Core Context
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 
 	//Create a window
 	SDL_Window * window = SDL_CreateWindow(

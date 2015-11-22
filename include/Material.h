@@ -18,6 +18,9 @@ public:
 
   void loadDiffuseMap(const string& filename);
 
+  void loadSkyBoxTextures(const string& filenamePosZ, const string& filenameNegZ, const string& filenamePosX,
+    const string& filenameNegX, const string& filenamePosY, const string& filenameNegY);
+
   vec4& getAmbientMaterial()
   {
     return m_AmbientMaterial;
@@ -63,6 +66,11 @@ public:
     return m_DiffuseMap;
   };
 
+  GLuint getEnvironmentMap()
+  {
+    return m_EnvironmentMap;
+  };
+
   void setUniform(const string& name, vec3& v)
   {
 	  glUniform3fv(m_UniformLocationMap[name], 1, value_ptr(v));
@@ -72,7 +80,7 @@ public:
   {
 	  glUniform4fv(m_UniformLocationMap[name], 1, value_ptr(v));
   };
-  
+
   void setUniform(const string& name, mat4& m)
   {
 	  glUniformMatrix4fv(m_UniformLocationMap[name], 1, GL_FALSE, value_ptr(m));
@@ -103,6 +111,7 @@ private:
   float m_SpecularPower;
 
   GLuint m_DiffuseMap;
+  GLuint m_EnvironmentMap;
 
   map<string, GLint> m_UniformLocationMap;
 };

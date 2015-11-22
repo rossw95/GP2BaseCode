@@ -10,12 +10,14 @@ Material::Material()
   m_SpecularMaterial=vec4(1.0f,1.0f,1.0f,1.0f);
   m_SpecularPower=25.0f;
   m_DiffuseMap = 0;
+  m_EnvironmentMap=0;
 }
 
 Material::~Material()
 {
   glDeleteProgram(m_ShaderProgram);
 	glDeleteTextures(1, &m_DiffuseMap);
+  glDeleteTextures(1,&m_EnvironmentMap);
 }
 
 void Material::loadShader(const string& vsFilename, const string& fsFilename)
@@ -67,6 +69,7 @@ void Material::setupUniforms()
 	GLint modelLocation = glGetUniformLocation(m_ShaderProgram, "Model");
 
 	GLint texture0Location = glGetUniformLocation(m_ShaderProgram, "texture0");
+  GLint cubeTextureLocation = glGetUniformLocation(m_ShaderProgram, "cubeTexture");
 
 	m_UniformLocationMap["MVP"] = MVPLocation;
 	m_UniformLocationMap["ambientLightColour"] = ambientLightColourLocation;
@@ -80,6 +83,7 @@ void Material::setupUniforms()
 	m_UniformLocationMap["cameraPosition"] = cameraPositionLocation;
 	m_UniformLocationMap["Model"] = modelLocation;
 	m_UniformLocationMap["texture0"] = texture0Location;
+  m_UniformLocationMap["cubeTexture"] = cubeTextureLocation;
 }
 
 void Material::loadDiffuseMap(const string& filename)
@@ -90,4 +94,10 @@ void Material::loadDiffuseMap(const string& filename)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glGenerateMipmap(GL_TEXTURE_2D);
+}
+
+void Material::loadSkyBoxTextures(const string& filenamePosZ, const string& filenameNegZ, const string& filenamePosX,
+  const string& filenameNegX, const string& filenamePosY, const string& filenameNegY)
+{
+  m_EnvironmentMap=loadCubeTexture(filenamePosZ,filenameNegZ,filenamePosX,filenameNegX,filenamePosY,filenameNegY);
 }

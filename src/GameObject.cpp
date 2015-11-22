@@ -40,8 +40,6 @@ void GameObject::update()
 	m_ModelMatrix = scaleMatrix*rotationMatrix*translationMatrix;
 	m_ModelMatrix *= parentModel;
 
-	m_Bounds.m_ModelMatrix=m_ModelMatrix;
-
 	for (auto iter = m_ChildGameObjects.begin(); iter != m_ChildGameObjects.end(); iter++)
 	{
 		(*iter)->update();
@@ -58,7 +56,6 @@ void GameObject::createBuffers(Vertex * pVerts, int numVerts, int *pIndices, int
 {
 	m_Mesh=shared_ptr<Mesh>(new Mesh);
 	m_Mesh->create(pVerts,numVerts,pIndices,numIndices);
-	m_Bounds.calculate(pVerts,numVerts);
 }
 
 void GameObject::loadShader(const string& vsFilename, const string& fsFilename)
