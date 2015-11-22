@@ -74,6 +74,7 @@ void initScene()
 	skyBox->setMaterial(skyMaterial);
 
 	skyBox->update();
+	
 }
 
 void cleanUp()
