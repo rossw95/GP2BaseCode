@@ -4,8 +4,8 @@
 
 GameObject::GameObject()
 {
-	m_Mesh=shared_ptr<Mesh>(new Mesh);
-	m_Material=shared_ptr<Material>(new Material);
+	m_Mesh=shared_ptr<Mesh>(NULL);
+	m_Material=shared_ptr<Material>(NULL);
 
 	m_ModelMatrix=mat4(1.0f);
 	m_Position=vec3(0.0f);

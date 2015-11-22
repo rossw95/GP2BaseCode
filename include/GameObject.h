@@ -125,6 +125,16 @@ public:
 	{
 		return m_Bounds;
 	};
+
+	shared_ptr<Mesh> getMesh()
+	{
+		return m_Mesh;
+	};
+
+	shared_ptr<Material> getMaterial()
+	{
+		return m_Material;
+	};
 private:
 
 	shared_ptr<Mesh> m_Mesh;

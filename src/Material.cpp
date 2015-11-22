@@ -37,13 +37,49 @@ void Material::loadShader(const string& vsFilename, const string& fsFilename)
 	glBindAttribLocation(m_ShaderProgram, 1, "vertexColour");
 	glBindAttribLocation(m_ShaderProgram, 2, "vertexTexCoords");
 	glBindAttribLocation(m_ShaderProgram, 3, "vertexNormal");
-  glBindAttribLocation(m_ShaderProgram, 7, "instancePosition");
+	glBindAttribLocation(m_ShaderProgram, 7, "instancePosition");
 
 	glLinkProgram(m_ShaderProgram);
 	checkForLinkErrors(m_ShaderProgram);
 	//now we can delete the VS & FS Programs
 	glDeleteShader(vertexShaderProgram);
 	glDeleteShader(fragmentShaderProgram);
+	setupUniforms();
+}
+
+void Material::setupUniforms()
+{
+	glUseProgram(m_ShaderProgram);
+	GLint MVPLocation = glGetUniformLocation(m_ShaderProgram, "MVP");
+
+	GLint ambientLightColourLocation = glGetUniformLocation(m_ShaderProgram, "ambientLightColour");
+	GLint ambientMaterialColourLocation = glGetUniformLocation(m_ShaderProgram, "ambientMaterialColour");
+
+	GLint diffuseLightColourLocation = glGetUniformLocation(m_ShaderProgram, "diffuseLightColour");
+	GLint diffuseLightMaterialLocation = glGetUniformLocation(m_ShaderProgram, "diffuseMaterialColour");
+	GLint lightDirectionLocation = glGetUniformLocation(m_ShaderProgram, "lightDirection");
+
+	GLint specularLightColourLocation = glGetUniformLocation(m_ShaderProgram, "specularLightColour");
+	GLint specularLightMaterialLocation = glGetUniformLocation(m_ShaderProgram, "specularMaterialColour");
+	GLint specularPowerLocation = glGetUniformLocation(m_ShaderProgram, "specularPower");
+	GLint cameraPositionLocation = glGetUniformLocation(m_ShaderProgram, "cameraPosition");
+
+	GLint modelLocation = glGetUniformLocation(m_ShaderProgram, "Model");
+
+	GLint texture0Location = glGetUniformLocation(m_ShaderProgram, "texture0");
+
+	m_UniformLocationMap["MVP"] = MVPLocation;
+	m_UniformLocationMap["ambientLightColour"] = ambientLightColourLocation;
+	m_UniformLocationMap["ambientMaterialColour"] = ambientMaterialColourLocation;
+	m_UniformLocationMap["diffuseLightColour"] = diffuseLightColourLocation;
+	m_UniformLocationMap["diffuseMaterialColour"] = diffuseLightMaterialLocation;
+	m_UniformLocationMap["lightDirection"] = lightDirectionLocation;
+	m_UniformLocationMap["specularLightColourLocation"] = specularLightColourLocation;
+	m_UniformLocationMap["specularLightMaterialLocation"] = specularLightMaterialLocation;
+	m_UniformLocationMap["specularPower"] = specularPowerLocation;
+	m_UniformLocationMap["cameraPosition"] = cameraPositionLocation;
+	m_UniformLocationMap["Model"] = modelLocation;
+	m_UniformLocationMap["texture0"] = texture0Location;
 }
 
 void Material::loadDiffuseMap(const string& filename)

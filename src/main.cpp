@@ -92,56 +92,32 @@ void update()
 void renderGameObject(shared_ptr<GameObject> gameObject)
 {
 	MVPMatrix = projMatrix*viewMatrix*gameObject->getModelMatrix();
+	shared_ptr<Material> mat = gameObject->getMaterial();
+	if (mat != NULL)
+	{
+		mat->bind();
+		mat->setUniform("MVP", MVPMatrix);
+		mat->setUniform("ambientLightColour", ambientLightColour);
+		mat->setUniform("ambientMaterialColour", mat->getAmbientMaterial());
 
-	if (gameObject->getShaderProgram() > 0){
-		currentShaderProgam = gameObject->getShaderProgram();
-		glUseProgram(currentShaderProgam);
+		mat->setUniform("diffuseLightColour", diffuseLightColour);
+		mat->setUniform("diffuseMaterialColour", mat->getDiffuseMaterial());
+		mat->setUniform("lightDirection", lightDirection);
+
+		mat->setUniform("specularLightColour", specularLightColour);
+		mat->setUniform("specularMaterialColour", mat->getSpecularMaterial());
+		mat->setUniform("specularPower", mat->getSpecularPower());
+		mat->setUniform("cameraPosition", cameraPosition);
+
+		mat->setUniform("Model", gameObject->getModelMatrix());
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, gameObject->getDiffuseMap());
+
+		mat->setUniform("texture0", 0);
 	}
-
-	GLint MVPLocation = glGetUniformLocation(currentShaderProgam, "MVP");
-
-	GLint ambientLightColourLocation = glGetUniformLocation(currentShaderProgam, "ambientLightColour");
-	GLint ambientMaterialColourLocation = glGetUniformLocation(currentShaderProgam, "ambientMaterialColour");
-
-	GLint diffuseLightColourLocation = glGetUniformLocation(currentShaderProgam, "diffuseLightColour");
-	GLint diffuseLightMaterialLocation = glGetUniformLocation(currentShaderProgam, "diffuseMaterialColour");
-	GLint lightDirectionLocation = glGetUniformLocation(currentShaderProgam, "lightDirection");
-
-	GLint specularLightColourLocation = glGetUniformLocation(currentShaderProgam, "specularLightColour");
-	GLint specularLightMaterialLocation = glGetUniformLocation(currentShaderProgam, "specularMaterialColour");
-	GLint specularPowerLocation = glGetUniformLocation(currentShaderProgam, "specularPower");
-	GLint cameraPositionLocation = glGetUniformLocation(currentShaderProgam, "cameraPosition");
-
-	GLint modelLocation = glGetUniformLocation(currentShaderProgam, "Model");
-
-	GLint texture0Location = glGetUniformLocation(currentShaderProgam, "texture0");
-
-	if (gameObject->getDiffuseMap() > 0){
-		currentDiffuseMap = gameObject->getDiffuseMap();
-	}
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, currentDiffuseMap);
-	glUniform1i(texture0Location, 0);
-
-	glUniformMatrix4fv(MVPLocation, 1, GL_FALSE, value_ptr(MVPMatrix));
-	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, value_ptr(gameObject->getModelMatrix()));
-
-	glUniform4fv(ambientLightColourLocation, 1, value_ptr(ambientLightColour));
-	glUniform4fv(ambientMaterialColourLocation, 1, value_ptr(gameObject->getAmbientMaterial()));
-
-	glUniform4fv(diffuseLightColourLocation, 1, value_ptr(diffuseLightColour));
-	glUniform4fv(diffuseLightMaterialLocation, 1, value_ptr(gameObject->getDiffuseMaterial()));
-	glUniform3fv(lightDirectionLocation, 1, value_ptr(lightDirection));
-
-	glUniform4fv(specularLightColourLocation, 1, value_ptr(specularLightColour));
-	glUniform4fv(specularLightMaterialLocation, 1, value_ptr(gameObject->getSpecularMaterial()));
-	glUniform1f(specularPowerLocation, gameObject->getSpecularPower());
-	glUniform3fv(cameraPositionLocation, 1, value_ptr(cameraPosition));
-
-
 	glBindVertexArray(gameObject->getVertexArrayObject());
-	if (gameObject->getVertexArrayObject()>0)
-		glDrawElements(GL_TRIANGLES, gameObject->getNumberOfIndices(), GL_UNSIGNED_INT, 0);
+
+	glDrawElements(GL_TRIANGLES, gameObject->getNumberOfIndices(), GL_UNSIGNED_INT, 0);
 
 	for (int i = 0; i < gameObject->getNumberOfChildren(); i++)
 	{
@@ -200,7 +176,7 @@ int main(int argc, char * arg[])
 	//Request opengl 4.1 context, Core Context
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
 
 	//Create a window
 	SDL_Window * window = SDL_CreateWindow(

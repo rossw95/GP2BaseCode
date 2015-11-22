@@ -9,7 +9,13 @@ public:
   Material();
   ~Material();
 
+  void bind()
+  {
+	  glUseProgram(m_ShaderProgram);
+  };
+
   void loadShader(const string& vsFilename, const string& fsFilename);
+
   void loadDiffuseMap(const string& filename);
 
   vec4& getAmbientMaterial()
@@ -57,10 +63,37 @@ public:
     return m_DiffuseMap;
   };
 
+  void setUniform(const string& name, vec3& v)
+  {
+	  glUniform3fv(m_UniformLocationMap[name], 1, value_ptr(v));
+  };
+
+  void setUniform(const string& name, vec4& v)
+  {
+	  glUniform4fv(m_UniformLocationMap[name], 1, value_ptr(v));
+  };
+  
+  void setUniform(const string& name, mat4& m)
+  {
+	  glUniformMatrix4fv(m_UniformLocationMap[name], 1, GL_FALSE, value_ptr(m));
+  };
+
+  void setUniform(const string& name, float f)
+  {
+	  glUniform1f(m_UniformLocationMap[name], f);
+  };
+
+  void setUniform(const string& name, int i)
+  {
+	  glUniform1i(m_UniformLocationMap[name], i);
+  };
+
   bool operator < (const Material& mat) const
   {
     return (m_ShaderProgram < mat.m_ShaderProgram);
   };
+private:
+	void setupUniforms();
 private:
   GLuint m_ShaderProgram;
 
@@ -70,5 +103,7 @@ private:
   float m_SpecularPower;
 
   GLuint m_DiffuseMap;
+
+  map<string, GLint> m_UniformLocationMap;
 };
 #endif

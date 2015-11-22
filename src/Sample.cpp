@@ -5,14 +5,14 @@
 
 #include "Cube.h"
 
-string vsSimplePath = ASSET_PATH + SHADER_PATH + "/simpleInstanceVS.glsl";
+string vsSimplePath = ASSET_PATH + SHADER_PATH + "/simpleVS.glsl";
 string fsSimplePath = ASSET_PATH + SHADER_PATH + "/simpleFS.glsl";
 
-string vsSpecularPath=ASSET_PATH+SHADER_PATH+"/specularInstanceVS.glsl";
+string vsSpecularPath=ASSET_PATH+SHADER_PATH+"/specularVS.glsl";
 string fsSpecularPath=ASSET_PATH+SHADER_PATH+"/specularFS.glsl";
 
-string vsTexturePath=ASSET_PATH+SHADER_PATH+"/textureInstanceVS.glsl";
-string fsTexturePath=ASSET_PATH+SHADER_PATH+"/simpleFS.glsl";
+string vsTexturePath=ASSET_PATH+SHADER_PATH+"/textureVS.glsl";
+string fsTexturePath=ASSET_PATH+SHADER_PATH+"/textureFS.glsl";
 
 string texturePath=ASSET_PATH+TEXTURE_PATH+"/texture.png";
 
@@ -70,7 +70,6 @@ void initSample(vector<shared_ptr<GameObject> > &displayList,int numX,int numY, 
         gameObject->setMesh(mesh);
 
         int materialID=rand()%materialList.size();
-        cout<<"Material ID "<<materialID<<endl;
         gameObject->setMaterial(materialList[materialID]);
         gameObject->setPosition(currentPos);
 
@@ -89,7 +88,7 @@ void initSample(vector<shared_ptr<GameObject> > &displayList,int numX,int numY, 
 
 void cleanUpSample()
 {
-
+	materialList.clear();
 }
 
 /*
