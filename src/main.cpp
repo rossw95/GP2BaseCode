@@ -29,7 +29,7 @@ vec4 specularLightColour=vec4(1.0f,1.0f,1.0f,1.0f);
 float specularPower=25.0f;
 
 vec3 lightDirection=vec3(0.0f,0.0f,1.0f);
-vec3 cameraPosition=vec3(10.0f,10.0f,60.0f);
+vec3 cameraPosition=vec3(10.0f,0.0f,10.0f);
 
 //for Framebuffer
 GLuint FBOTexture;
@@ -136,9 +136,9 @@ void renderGameObject(shared_ptr<GameObject> gameObject)
 
 		mat->setUniform("texture0", 0);
 
-		glActiveTexture(GL_TEXTURE4);
-		glBindTexture(GL_TEXTURE_2D, mat->getEnvironmentMap());
-		mat->setUniform("cubeTexture", 4);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, mat->getEnvironmentMap());
+		mat->setUniform("cubeTexture", 0);
 	}
 	glBindVertexArray(gameObject->getVertexArrayObject());
 
@@ -164,8 +164,9 @@ void renderScene()
 		renderGameObject((*iter));
 	}
 	//Turn off depth Buffering
+	glDepthMask(GL_FALSE);
 	renderGameObject(skyBox);
-
+	glDepthMask(GL_TRUE);
 	renderQueue.clear();
 }
 
@@ -203,7 +204,7 @@ int main(int argc, char * arg[])
 	//Request opengl 4.1 context, Core Context
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
 
 	//Create a window
 	SDL_Window * window = SDL_CreateWindow(

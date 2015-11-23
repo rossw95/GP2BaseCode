@@ -69,7 +69,7 @@ void Material::setupUniforms()
 	GLint modelLocation = glGetUniformLocation(m_ShaderProgram, "Model");
 
 	GLint texture0Location = glGetUniformLocation(m_ShaderProgram, "texture0");
-  GLint cubeTextureLocation = glGetUniformLocation(m_ShaderProgram, "cubeTexture");
+	GLint cubeTextureLocation = glGetUniformLocation(m_ShaderProgram, "cubeTexture");
 
 	m_UniformLocationMap["MVP"] = MVPLocation;
 	m_UniformLocationMap["ambientLightColour"] = ambientLightColourLocation;
@@ -83,7 +83,7 @@ void Material::setupUniforms()
 	m_UniformLocationMap["cameraPosition"] = cameraPositionLocation;
 	m_UniformLocationMap["Model"] = modelLocation;
 	m_UniformLocationMap["texture0"] = texture0Location;
-  m_UniformLocationMap["cubeTexture"] = cubeTextureLocation;
+	m_UniformLocationMap["cubeTexture"] = cubeTextureLocation;
 }
 
 void Material::loadDiffuseMap(const string& filename)
