@@ -9,6 +9,6 @@ uniform mat4 MVP;
 
 void main()
 {
-	vertexTexCoordsOut = vertexPosition;
+	vertexTexCoordsOut = normalize(vertexPosition);
 	gl_Position = MVP * vec4(vertexPosition + cameraPosition, 1.0);
 }
