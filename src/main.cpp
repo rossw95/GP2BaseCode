@@ -22,6 +22,7 @@ shared_ptr<GameObject> skyBox;
 GLuint currentShaderProgam = 0;
 GLuint currentDiffuseMap = 0;
 
+shared_ptr<Material> currentMaterial;
 
 vec4 ambientLightColour=vec4(1.0f,1.0f,1.0f,1.0f);
 vec4 diffuseLightColour=vec4(1.0f,1.0f,1.0f,1.0f);
@@ -29,7 +30,7 @@ vec4 specularLightColour=vec4(1.0f,1.0f,1.0f,1.0f);
 float specularPower=25.0f;
 
 vec3 lightDirection=vec3(0.0f,0.0f,1.0f);
-vec3 cameraPosition=vec3(10.0f,0.0f,10.0f);
+vec3 cameraPosition=vec3(0.0f,0.0f,10.0f);
 
 //for Framebuffer
 GLuint FBOTexture;
@@ -75,6 +76,19 @@ void initScene()
 
 	skyBox->update();
 
+	string teapotMeshPath=ASSET_PATH+MODEL_PATH+"/utah-teapot.fbx";
+	shared_ptr<GameObject> teapot=loadFBXFromFile(teapotMeshPath);
+	teapot->setScale(vec3(0.5f,0.5f,0.5f));
+	teapot->setPosition(vec3(0.0f,0.0f,-50.0f));
+	shared_ptr<Material> teapotMaterial=shared_ptr<Material>(new Material);
+	vsPath=ASSET_PATH+SHADER_PATH+"/specularReflectionVS.glsl";
+	fsPath=ASSET_PATH+SHADER_PATH+"/specularReflectionFS.glsl";
+	teapotMaterial->loadShader(vsPath,fsPath);
+	teapotMaterial->loadSkyBoxTextures(skyBoxFront,skyBoxBack,skyBoxLeft,skyBoxRight,skyBoxUp,skyBoxDown);
+	teapot->setMaterial(teapotMaterial);
+
+
+	gameObjects.push_back(teapot);
 }
 
 void cleanUp()
@@ -113,32 +127,34 @@ void update()
 void renderGameObject(shared_ptr<GameObject> gameObject)
 {
 	MVPMatrix = projMatrix*viewMatrix*gameObject->getModelMatrix();
-	shared_ptr<Material> mat = gameObject->getMaterial();
-	if (mat != NULL)
+
+	if (gameObject->getMaterial() != NULL)
 	{
-		mat->bind();
-		mat->setUniform("MVP", MVPMatrix);
-		mat->setUniform("ambientLightColour", ambientLightColour);
-		mat->setUniform("ambientMaterialColour", mat->getAmbientMaterial());
+		currentMaterial = gameObject->getMaterial();
+	}
 
-		mat->setUniform("diffuseLightColour", diffuseLightColour);
-		mat->setUniform("diffuseMaterialColour", mat->getDiffuseMaterial());
-		mat->setUniform("lightDirection", lightDirection);
+		currentMaterial->bind();
+		currentMaterial->setUniform("MVP", MVPMatrix);
+		currentMaterial->setUniform("ambientLightColour", ambientLightColour);
+		currentMaterial->setUniform("ambientMaterialColour", currentMaterial->getAmbientMaterial());
 
-		mat->setUniform("specularLightColour", specularLightColour);
-		mat->setUniform("specularMaterialColour", mat->getSpecularMaterial());
-		mat->setUniform("specularPower", mat->getSpecularPower());
-		mat->setUniform("cameraPosition", cameraPosition);
+		currentMaterial->setUniform("diffuseLightColour", diffuseLightColour);
+		currentMaterial->setUniform("diffuseMaterialColour", currentMaterial->getDiffuseMaterial());
+		currentMaterial->setUniform("lightDirection", lightDirection);
 
-		mat->setUniform("Model", gameObject->getModelMatrix());
+		currentMaterial->setUniform("specularLightColour", specularLightColour);
+		currentMaterial->setUniform("specularMaterialColour", currentMaterial->getSpecularMaterial());
+		currentMaterial->setUniform("specularPower", currentMaterial->getSpecularPower());
+		currentMaterial->setUniform("cameraPosition", cameraPosition);
+
+		currentMaterial->setUniform("Model", gameObject->getModelMatrix());
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, mat->getDiffuseMap());
-		mat->setUniform("texture0", 0);
+		glBindTexture(GL_TEXTURE_2D, currentMaterial->getDiffuseMap());
+		currentMaterial->setUniform("texture0", 0);
 
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, mat->getEnvironmentMap());
-		mat->setUniform("cubeTexture", 1);
-	}
+		glBindTexture(GL_TEXTURE_CUBE_MAP, currentMaterial->getEnvironmentMap());
+		currentMaterial->setUniform("cubeTexture", 1);
 	glBindVertexArray(gameObject->getVertexArrayObject());
 
 	glDrawElements(GL_TRIANGLES, gameObject->getNumberOfIndices(), GL_UNSIGNED_INT, 0);
@@ -158,14 +174,16 @@ void renderScene()
 	//clear the colour and depth buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	glDepthMask(GL_FALSE);
+	renderGameObject(skyBox);
+	glDepthMask(GL_TRUE);
+
 	for (auto iter = renderQueue.begin(); iter != renderQueue.end(); iter++)
 	{
 		renderGameObject((*iter));
 	}
 	//Turn off depth Buffering
-	glDepthMask(GL_FALSE);
-	renderGameObject(skyBox);
-	glDepthMask(GL_TRUE);
+
 	renderQueue.clear();
 }
 
