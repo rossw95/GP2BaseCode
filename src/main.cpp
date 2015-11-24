@@ -133,7 +133,6 @@ void renderGameObject(shared_ptr<GameObject> gameObject)
 		mat->setUniform("Model", gameObject->getModelMatrix());
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, mat->getDiffuseMap());
-
 		mat->setUniform("texture0", 0);
 
 		glActiveTexture(GL_TEXTURE1);
@@ -176,6 +175,7 @@ void render()
 	//renderPostQuad();
 }
 
+
 int main(int argc, char * arg[])
 {
 	ChangeWorkingDirectory();
@@ -204,7 +204,7 @@ int main(int argc, char * arg[])
 	//Request opengl 4.1 context, Core Context
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
 
 	//Create a window
 	SDL_Window * window = SDL_CreateWindow(
