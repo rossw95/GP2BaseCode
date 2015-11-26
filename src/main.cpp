@@ -81,10 +81,12 @@ void initScene()
 	teapot->setScale(vec3(0.5f,0.5f,0.5f));
 	teapot->setPosition(vec3(0.0f,0.0f,-50.0f));
 	shared_ptr<Material> teapotMaterial=shared_ptr<Material>(new Material);
-	vsPath=ASSET_PATH+SHADER_PATH+"/specularReflectionVS.glsl";
-	fsPath=ASSET_PATH+SHADER_PATH+"/specularReflectionFS.glsl";
+	vsPath=ASSET_PATH+SHADER_PATH+"/specularVS.glsl";
+	fsPath=ASSET_PATH+SHADER_PATH+"/specularToonFS.glsl";
+	teapotMaterial->setDiffuseMaterial(vec4(0.6f,0.0f,0.0f,1.0f));
 	teapotMaterial->loadShader(vsPath,fsPath);
-	teapotMaterial->loadSkyBoxTextures(skyBoxFront,skyBoxBack,skyBoxLeft,skyBoxRight,skyBoxUp,skyBoxDown);
+	short textureData[]={50,50,50,255,255,255};
+	teapotMaterial->loadToonMap(textureData,2);
 	teapot->setMaterial(teapotMaterial);
 
 
@@ -155,6 +157,13 @@ void renderGameObject(shared_ptr<GameObject> gameObject)
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, currentMaterial->getEnvironmentMap());
 		currentMaterial->setUniform("cubeTexture", 1);
+
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, currentMaterial->getToonMap());
+		currentMaterial->setUniform("toonShade", 2);
+
+		currentMaterial->setUniform("numberOfColours", 2);
+
 	glBindVertexArray(gameObject->getVertexArrayObject());
 
 	glDrawElements(GL_TRIANGLES, gameObject->getNumberOfIndices(), GL_UNSIGNED_INT, 0);

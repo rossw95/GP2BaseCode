@@ -12,6 +12,8 @@ GLuint loadCubeTexture(const string& filenamePosZ, const string& filenameNegZ, c
 
 GLuint convertSDLSurfaceToTexture(SDL_Surface * surface);
 
+GLuint create1DTexture(short *pData,int width);
+
 void loadCubeMapFace(const string& filename, GLenum face);
 
 #endif

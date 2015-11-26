@@ -146,3 +146,15 @@ GLuint loadCubeTexture(const string& filenamePosZ, const string& filenameNegZ, c
 
 	return cubeTextureID;
 }
+
+GLuint create1DTexture(short *pData,int width)
+{
+	GLuint texture1D;
+	glActiveTexture(GL_TEXTURE2);
+	glGenTextures(1,&texture1D);
+	glBindTexture(GL_TEXTURE_1D, texture1D);
+
+	glTexImage1D(GL_TEXTURE_1D,0,3,width,0,GL_RGB,GL_UNSIGNED_BYTE,(void**)pData);
+
+	return texture1D;
+}
