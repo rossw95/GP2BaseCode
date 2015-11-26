@@ -21,8 +21,6 @@ public:
   void loadSkyBoxTextures(const string& filenamePosZ, const string& filenameNegZ, const string& filenamePosX,
     const string& filenameNegX, const string& filenamePosY, const string& filenameNegY);
 
-  void loadToonMap(short *pData,int width);
-
   vec4& getAmbientMaterial()
   {
     return m_AmbientMaterial;
@@ -66,11 +64,6 @@ public:
   GLuint getDiffuseMap()
   {
     return m_DiffuseMap;
-  };
-
-  GLuint getToonMap()
-  {
-    return m_ToonShadeMap;
   };
 
   GLuint getEnvironmentMap()
@@ -119,7 +112,6 @@ private:
 
   GLuint m_DiffuseMap;
   GLuint m_EnvironmentMap;
-  GLuint m_ToonShadeMap;
 
   map<string, GLint> m_UniformLocationMap;
 };

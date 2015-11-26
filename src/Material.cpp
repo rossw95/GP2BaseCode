@@ -8,10 +8,9 @@ Material::Material()
   m_AmbientMaterial = vec4(0.3f,0.3f,0.3f,1.0f);
   m_DiffuseMaterial=vec4(0.8f,0.8f,0.8f,1.0f);
   m_SpecularMaterial=vec4(1.0f,1.0f,1.0f,1.0f);
-  m_SpecularPower=50.0f;
+  m_SpecularPower=25.0f;
   m_DiffuseMap = 0;
   m_EnvironmentMap=0;
-  m_ToonShadeMap=0;
 }
 
 Material::~Material()
@@ -19,7 +18,6 @@ Material::~Material()
   glDeleteProgram(m_ShaderProgram);
 	glDeleteTextures(1, &m_DiffuseMap);
   glDeleteTextures(1,&m_EnvironmentMap);
-  glDeleteTextures(1,&m_ToonShadeMap);
 }
 
 void Material::loadShader(const string& vsFilename, const string& fsFilename)
@@ -72,9 +70,6 @@ void Material::setupUniforms()
 
 	GLint texture0Location = glGetUniformLocation(m_ShaderProgram, "texture0");
 	GLint cubeTextureLocation = glGetUniformLocation(m_ShaderProgram, "cubeTexture");
-  GLint toonTextureLocation = glGetUniformLocation(m_ShaderProgram, "toonShade");
-
-  GLint numberOfColoursLocation = glGetUniformLocation(m_ShaderProgram, "numberOfColours");
 
 	m_UniformLocationMap["MVP"] = MVPLocation;
 	m_UniformLocationMap["ambientLightColour"] = ambientLightColourLocation;
@@ -89,17 +84,6 @@ void Material::setupUniforms()
 	m_UniformLocationMap["Model"] = modelLocation;
 	m_UniformLocationMap["texture0"] = texture0Location;
 	m_UniformLocationMap["cubeTexture"] = cubeTextureLocation;
-  m_UniformLocationMap["toonShade"] = toonTextureLocation;
-  m_UniformLocationMap["numberOfColours"] = numberOfColoursLocation;
-}
-
-void Material::loadToonMap(short *pData,int width)
-{
-  m_ToonShadeMap=create1DTexture(pData,width);
-  glTexParameteri (GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri (GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
 void Material::loadDiffuseMap(const string& filename)
