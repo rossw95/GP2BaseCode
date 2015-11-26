@@ -24,7 +24,7 @@ void main()
 	vec3 halfWayVec = normalize(cameraDirectionOut + lightDirectionNormalized);
 	float specularTerm = pow(max(dot(worldNormal, halfWayVec),0.0f), specularPower);
 
-	vec3 reflected = reflect (normalize(cameraDirectionOut), normalize(worldNormal));
+	vec3 reflected = reflect (normalize(worldNormal), normalize(cameraDirectionOut));
 	vec4 reflectionColour = texture(cubeTexture, normalize(reflected));
 
 	vec4 materialColour = (ambientMaterialColour*ambientLightColour) +
