@@ -24,9 +24,9 @@ GLuint currentDiffuseMap = 0;
 
 shared_ptr<Material> currentMaterial;
 
-vec4 ambientLightColour=vec4(1.0f,1.0f,1.0f,1.0f);
-vec4 diffuseLightColour=vec4(1.0f,1.0f,1.0f,1.0f);
-vec4 specularLightColour=vec4(1.0f,1.0f,1.0f,1.0f);
+vec4 ambientLightColour=vec4(1.0f,1.0f,10.0f,1.0f);
+vec4 diffuseLightColour = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+vec4 specularLightColour = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 float specularPower=25.0f;
 
 vec3 lightDirection=vec3(0.0f,0.0f,1.0f);
@@ -50,6 +50,8 @@ int frameCounter=0;
 float FPS;
 float frameTime;
 
+
+
 void initScene()
 {
 	currentTicks=SDL_GetTicks();
@@ -67,8 +69,8 @@ void initScene()
 	string skyBoxDown=ASSET_PATH+TEXTURE_PATH+"/Skybox/Sunny_down.png";
 	skyMaterial->loadSkyBoxTextures(skyBoxFront,skyBoxBack,skyBoxLeft,skyBoxRight,skyBoxUp,skyBoxDown);
 
-	string vsPath=ASSET_PATH+SHADER_PATH+"/skyVS.glsl";
-	string fsPath=ASSET_PATH+SHADER_PATH+"/skyFS.glsl";
+	string vsPath=ASSET_PATH+SHADER_PATH+"/simpleVS.glsl";
+	string fsPath=ASSET_PATH+SHADER_PATH+"/simpleFS.glsl";
 	skyMaterial->loadShader(vsPath,fsPath);
 	skyBox=shared_ptr<GameObject>(new GameObject);
 	skyBox->setMesh(cubeMesh);
@@ -166,6 +168,7 @@ void renderGameObject(shared_ptr<GameObject> gameObject)
 }
 
 
+
 void renderScene()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -189,13 +192,15 @@ void renderScene()
 
 void render()
 {
-	renderScene();
+	renderScene(); 
 	//renderPostQuad();
 }
 
 
+
 int main(int argc, char * arg[])
 {
+
 	ChangeWorkingDirectory();
 	//Controls the game loop
 	bool run = true;
@@ -215,9 +220,9 @@ int main(int argc, char * arg[])
 		cout << "ERROR	SDL_Image	Init	" << IMG_GetError() << endl;
 	}
 
-	if (TTF_Init() == -1)	{
-		std::cout << "ERROR	TTF_Init:	" << TTF_GetError();
-	}
+	//if (TTF_Init() == -1)	{
+	//	std::cout << "ERROR	TTF_Init:	" << TTF_GetError();
+	//}
 
 	//Request opengl 4.1 context, Core Context
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
@@ -285,7 +290,6 @@ int main(int argc, char * arg[])
 	SDL_GL_DeleteContext(glcontext);
 	SDL_DestroyWindow(window);
 	IMG_Quit();
-	TTF_Quit();
 	SDL_Quit();
 
 	return 0;

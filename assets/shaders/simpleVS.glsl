@@ -1,10 +1,31 @@
-#version 150
+/*
+ * @brief Planar shadows vertex shader.
+ */
 
-in vec3 vertexPosition;
+#version 120
 
-uniform mat4 MVP;
+uniform mat4 MATRIX;
 
-void main()
-{
-  gl_Position = MVP * vec4(vertexPosition, 1.0);
+varying vec4 point;
+
+/*
+ * @brief
+ */
+void ShadowVertex() {
+
+    point = gl_ModelViewMatrix * MATRIX * gl_Vertex;    
+}
+
+/*
+ * @brief Program entry point.
+ */
+void main(void) {
+
+    // mvp transform into clip space
+    gl_Position = gl_ModelViewProjectionMatrix * MATRIX * gl_Vertex;
+
+    // and primary color
+    gl_FrontColor = gl_Color;
+
+    ShadowVertex();
 }

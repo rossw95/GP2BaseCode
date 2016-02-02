@@ -14,7 +14,6 @@ using namespace std;
 #include <GL/glew.h>
 #include <SDL.h>
 #include <SDL_Image.h>
-#include <SDL_ttf.h>
 #include <SDL_opengl.h>
 #include <fbxsdk.h>
 
